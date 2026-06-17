@@ -991,3 +991,43 @@ This improves performance in large applications.
 ## Interview Answer (Short)
 
 > Context API is a built-in React feature used for sharing global data such as themes, authentication, and language settings. Redux is a dedicated state management library that provides a centralized store, predictable state updates, middleware support, and better scalability for large applications. Context API is suitable for simple global state, whereas Redux is preferred for complex and frequently changing application state.
+
+**React.Fragment** is a React component that lets you group multiple elements **without adding an extra HTML tag** to the DOM.
+
+### Why use it?
+
+Sometimes a component needs to return multiple elements, but you don't want unnecessary `<div>` wrappers.
+
+### Example
+
+❌ Without Fragment:
+
+```jsx
+function User() {
+  return (
+    <div>
+      <h1>Prakash</h1>
+      <p>Developer</p>
+    </div>
+  );
+}
+```
+
+✅ With Fragment:
+
+```jsx
+function User() {
+  return (
+    <>
+      <h1>Prakash</h1>
+      <p>Developer</p>
+    </>
+  );
+}
+```
+
+### Real-life example
+
+<></> called react fregment
+
+Think of **React.Fragment** like a **transparent folder** that holds multiple papers together. The papers stay organized, but the folder itself is invisible and doesn't take up any space.

@@ -3,6 +3,7 @@ import Example from "./component/Example";
 import { UserContext } from "./UserContext";
 import Example2 from "./component/Example2";
 import Rendering from "./component/Rendering";
+import Counter from "./component/Counter";
 
 const App = () => {
   const user = {
@@ -25,6 +26,7 @@ const App = () => {
           <button onClick={() => setCount((prev) => prev + 1)}>{Count}</button>
 
           <Rendering />
+          <Counter />
         </div>
       </UserContext.Provider>
     </>
