@@ -1,1033 +1,911 @@
-### `useContext` Hook Example
+This is a very large set (50 React questions). To keep it GitHub-friendly and easy to revise, it's better to split it into **2 parts**.
 
-`useContext` is used to access data from a Context without passing props manually through every component.
-
-#### 1. Create Context
-
-```jsx
-import { createContext } from "react";
-
-export const UserContext = createContext();
-```
+# React Interview Questions & Answers (Part 1/2)
 
 ---
 
-#### 2. Provide Context Value
+## 1. What is React and why is it used?
 
-```jsx
-import React from "react";
-import { UserContext } from "./UserContext";
-import Profile from "./Profile";
+**Answer:**
+React is a JavaScript library for building user interfaces. It helps create reusable UI components and update the UI efficiently.
 
-function App() {
-  const user = {
-    name: "Prakash",
-    role: "Frontend Developer",
-  };
+**Real-Life Example:**
+Building a house using reusable Lego blocks.
 
-  return (
-    <UserContext.Provider value={user}>
-      <Profile />
-    </UserContext.Provider>
-  );
-}
-
-export default App;
-```
-
----
-
-#### 3. Consume Context with `useContext`
-
-```jsx
-import React, { useContext } from "react";
-import { UserContext } from "./UserContext";
-
-function Profile() {
-  const user = useContext(UserContext);
-
-  return (
-    <div>
-      <h2>Name: {user.name}</h2>
-      <p>Role: {user.role}</p>
-    </div>
-  );
-}
-
-export default Profile;
-```
-
-### Interview Answer
-
-> `useContext` is a React Hook that allows a component to access data from a Context directly without prop drilling. For example, if user information is stored in `UserContext`, we can retrieve it using `const user = useContext(UserContext)` and use it anywhere inside the component.
-
-A common use case for `useContext` is a **Light/Dark Theme Toggle**.
-
-### 1. Create Theme Context
-
-```jsx
-import { createContext } from "react";
-
-export const ThemeContext = createContext();
-```
-
----
-
-### 2. Provide Theme State
-
-```jsx
-import React, { useState } from "react";
-import { ThemeContext } from "./ThemeContext";
-import Home from "./Home";
-
-function App() {
-  const [theme, setTheme] = useState("light");
-
-  const toggleTheme = () => {
-    setTheme(theme === "light" ? "dark" : "light");
-  };
-
-  return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      <Home />
-    </ThemeContext.Provider>
-  );
-}
-
-export default App;
-```
-
----
-
-### 3. Use Context in Child Component
-
-```jsx
-import React, { useContext } from "react";
-import { ThemeContext } from "./ThemeContext";
-
-function Home() {
-  const { theme, toggleTheme } = useContext(ThemeContext);
-
-  return (
-    <div
-      style={{
-        backgroundColor: theme === "light" ? "#fff" : "#333",
-        color: theme === "light" ? "#000" : "#fff",
-        minHeight: "100vh",
-        padding: "20px",
-      }}
-    >
-      <h1>{theme.toUpperCase()} MODE</h1>
-
-      <button onClick={toggleTheme}>
-        Switch to {theme === "light" ? "Dark" : "Light"} Mode
-      </button>
-    </div>
-  );
-}
-
-export default Home;
-```
-
-### Interview Explanation
-
-> `useContext` is useful for sharing global data like themes, user authentication, or language settings. In a dark/light mode example, the theme state is stored in a `ThemeContext.Provider`, and any component can access or update the theme using `useContext(ThemeContext)` without passing props through multiple levels of components.
-
-### Important `useRef` Example: Focus an Input Field
-
-This is one of the most common interview examples.
-
-```jsx
-import React, { useRef } from "react";
-
-function Login() {
-  const inputRef = useRef();
-
-  const handleFocus = () => {
-    inputRef.current.focus();
-  };
-
-  return (
-    <div>
-      <input ref={inputRef} type="text" placeholder="Enter username" />
-      <button onClick={handleFocus}>Focus Input</button>
-    </div>
-  );
-}
-
-export default Login;
-```
-
-### How it works
-
-- `useRef()` creates a reference object.
-- `ref={inputRef}` attaches the ref to the input element.
-- `inputRef.current` points to the actual DOM element.
-- Calling `inputRef.current.focus()` focuses the input.
-
-### Interview Answer
-
-> `useRef` is used to persist values between renders and to directly access DOM elements without causing re-renders. A common example is focusing an input field programmatically using `inputRef.current.focus()`. This is useful in forms, search bars, and login pages.
-
-Yes, you **can** apply styles using `useRef`, because `ref.current` gives you direct access to the DOM element.
-
-### Example: Change Input Border Color
-
-```jsx id="39rk4j"
-import React, { useRef } from "react";
-
-function App() {
-  const inputRef = useRef();
-
-  const changeStyle = () => {
-    inputRef.current.style.border = "2px solid red";
-    inputRef.current.style.backgroundColor = "lightyellow";
-  };
-
-  return (
-    <div>
-      <input ref={inputRef} placeholder="Enter text" />
-      <button onClick={changeStyle}>Change Style</button>
-    </div>
-  );
-}
-
-export default App;
-```
-
-### Interview Point
-
-> Although `useRef` can be used to directly manipulate styles through the DOM (`inputRef.current.style`), in React it's generally recommended to control styles through state and props. Direct DOM manipulation with refs is mainly used for tasks like focusing elements, scrolling, playing videos, measuring element sizes, or integrating with third-party libraries.
-
-**Preferred React way:**
-
-```jsx id="f1l2kx"
-const [isActive, setIsActive] = useState(false);
-
-<input
-  style={{
-    border: isActive ? "2px solid red" : "1px solid gray",
-  }}
-/>;
-```
-
-This keeps the UI declarative and easier to maintain.
-
-### Real-World `useMemo` Example: Shopping Cart Total
-
-Suppose an e-commerce application has many products in a cart. Calculating the total price can be expensive if there are hundreds of items. We can use `useMemo` to recalculate the total only when the cart items change.
-
-```jsx
-import React, { useMemo, useState } from "react";
-
-function Cart() {
-  const [count, setCount] = useState(0);
-
-  const items = [
-    { id: 1, price: 100, quantity: 2 },
-    { id: 2, price: 200, quantity: 1 },
-    { id: 3, price: 300, quantity: 3 },
-  ];
-
-  const totalPrice = useMemo(() => {
-    console.log("Calculating total...");
-
-    return items.reduce((total, item) => total + item.price * item.quantity, 0);
-  }, [items]);
-
-  return (
-    <div>
-      <h2>Total Price: ₹{totalPrice}</h2>
-
-      <button onClick={() => setCount(count + 1)}>Counter: {count}</button>
-    </div>
-  );
-}
-
-export default Cart;
-```
-
-### What Happens?
-
-- When **Counter** is clicked, the component re-renders.
-- Without `useMemo`, the total price calculation runs on every render.
-- With `useMemo`, the calculation runs only when `items` changes.
-- Clicking the counter does **not** recalculate the total.
-
-### Interview Answer
-
-> `useMemo` is used to memoize expensive calculations and avoid recomputing them on every render. For example, in an e-commerce cart, calculating the total price from hundreds of products can be costly. By wrapping the calculation in `useMemo`, React recalculates the total only when the cart items change, improving performance.
-
-### Real-World `useCallback` Example: Prevent Unnecessary Child Re-renders
-
-Imagine a dashboard with a parent component and a child component. The child is wrapped with `React.memo()`.
-
-Without `useCallback`, the function is recreated on every render, causing the child to re-render unnecessarily.
-
----
-
-### Child Component
-
-```jsx
-import React from "react";
-
-const UserList = React.memo(({ onDelete }) => {
-  console.log("UserList Rendered");
-
-  return (
-    <div>
-      <button onClick={() => onDelete(1)}>Delete User</button>
-    </div>
-  );
-});
-
-export default UserList;
-```
-
----
-
-### Parent Component
-
-```jsx
-import React, { useState, useCallback } from "react";
-import UserList from "./UserList";
-
-function App() {
-  const [count, setCount] = useState(0);
-
-  const handleDelete = useCallback((id) => {
-    console.log("Deleting user:", id);
-  }, []);
-
-  return (
-    <div>
-      <h2>Counter: {count}</h2>
-
-      <button onClick={() => setCount(count + 1)}>Increment</button>
-
-      <UserList onDelete={handleDelete} />
-    </div>
-  );
-}
-
-export default App;
-```
-
----
-
-### What Happens?
-
-#### Without `useCallback`
-
-```jsx
-const handleDelete = (id) => {
-  console.log("Deleting user:", id);
-};
-```
-
-Every time `count` changes:
-
-- Parent re-renders.
-- `handleDelete` is recreated.
-- Child receives a new function reference.
-- Child re-renders unnecessarily.
-
----
-
-#### With `useCallback`
-
-```jsx
-const handleDelete = useCallback((id) => {
-  console.log("Deleting user:", id);
-}, []);
-```
-
-Now:
-
-- Parent re-renders when `count` changes.
-- `handleDelete` keeps the same reference.
-- Child does not re-render unnecessarily.
-
----
-
-### Most Common Real-World Uses
-
-1. **Data tables** with hundreds of rows.
-2. **User lists** with edit/delete buttons.
-3. **E-commerce product lists**.
-4. **Dashboard widgets**.
-5. Passing handlers to components wrapped with `React.memo()`.
-
----
-
-### Interview Answer
-
-> `useCallback` memoizes a function and returns the same function reference between renders unless its dependencies change. It is mainly used when passing callback functions to child components wrapped with `React.memo()` to prevent unnecessary re-renders and improve performance.
-
-### What is `React.memo()`?
-
-`React.memo()` is a Higher-Order Component (HOC) that **prevents a component from re-rendering if its props have not changed**.
-
-Think of it as **"remember the last rendered result"**.
-
----
-
-### Without `React.memo()`
-
-```jsx
-function Child() {
-  console.log("Child Rendered");
-
-  return <h2>Child Component</h2>;
-}
-```
+**Working Example:**
 
 ```jsx
 function App() {
-  const [count, setCount] = useState(0);
-
-  return (
-    <>
-      <button onClick={() => setCount(count + 1)}>Count: {count}</button>
-
-      <Child />
-    </>
-  );
+  return <h1>Hello React</h1>;
 }
 ```
 
-**Output:**
-
-Every time the button is clicked:
-
-```
-Child Rendered
-Child Rendered
-Child Rendered
-```
-
-Even though the child has no relation to `count`, it still re-renders.
-
 ---
 
-### With `React.memo()`
+## 2. What are the key features of React?
+
+**Answer:**
+
+- Component-Based Architecture
+- Virtual DOM
+- One-Way Data Flow
+- JSX
+- Hooks
+
+**Real-Life Example:**
+Building a car using reusable parts like wheels, doors, and engines.
+
+**Working Example:**
 
 ```jsx
-const Child = React.memo(() => {
-  console.log("Child Rendered");
-
-  return <h2>Child Component</h2>;
-});
-```
-
-Now when `count` changes:
-
-```jsx
-function App() {
-  const [count, setCount] = useState(0);
-
-  return (
-    <>
-      <button onClick={() => setCount(count + 1)}>Count: {count}</button>
-
-      <Child />
-    </>
-  );
+function Button() {
+  return <button>Click Me</button>;
 }
 ```
 
-**Output:**
+---
 
-```
-Child Rendered
+## 3. What is the Virtual DOM?
+
+**Answer:**
+Virtual DOM is a lightweight copy of the Real DOM. React updates the Virtual DOM first and then updates only changed parts in the Real DOM.
+
+**Real-Life Example:**
+Editing a draft before publishing the final document.
+
+**Working Example:**
+
+```jsx
+setCount(count + 1);
 ```
 
-Only once on the first render.
+React updates Virtual DOM before updating Real DOM.
 
 ---
 
-### Real-World Example
+## 4. How does React's reconciliation algorithm work?
 
-Suppose you have:
+**Answer:**
+Reconciliation compares the old Virtual DOM with the new Virtual DOM and updates only changed elements.
 
-```jsx
-<ProductList products={products} />
-```
+**Real-Life Example:**
+Finding differences between two versions of a document.
 
-and
-
-```jsx
-<SearchBar />
-```
-
-When the user types in the search box, the parent component re-renders.
-
-Without `React.memo()`, `ProductList` may also re-render unnecessarily.
+**Working Example:**
 
 ```jsx
-const ProductList = React.memo(({ products }) => {
-  return (
-    <div>
-      {products.map((product) => (
-        <p key={product.id}>{product.name}</p>
-      ))}
-    </div>
-  );
-});
+<h1>{count}</h1>
 ```
 
-Now `ProductList` re-renders only when `products` changes.
+Only the changed text is updated.
 
 ---
 
-### Why is `useCallback` used with `React.memo()`?
+## 5. What is the difference between Virtual DOM and Real DOM?
 
-```jsx
-const handleDelete = useCallback((id) => {
-  console.log(id);
-}, []);
+| Virtual DOM      | Real DOM           |
+| ---------------- | ------------------ |
+| Lightweight copy | Actual DOM         |
+| Faster updates   | Slower updates     |
+| Managed by React | Managed by Browser |
 
-<UserList onDelete={handleDelete} />;
-```
-
-Because `React.memo()` compares props by reference.
-
-If you pass a normal function:
-
-```jsx
-<UserList onDelete={() => console.log("Delete")} />
-```
-
-a new function is created on every render, so `React.memo()` can't prevent re-renders.
-
-That's why `useCallback` and `React.memo()` are often used together.
+**Real-Life Example:**
+Blueprint vs actual building.
 
 ---
 
-### Interview Answer (Short)
+## 6. What are functional components and class components?
 
-> `React.memo()` is a Higher-Order Component that memoizes a functional component and prevents unnecessary re-renders. The component re-renders only when its props change. It is commonly used to optimize performance in large applications, especially together with `useCallback` and `useMemo`.
+**Answer:**
+Functional components are JavaScript functions. Class components use ES6 classes and lifecycle methods.
 
-### What is `useReducer`?
+**Real-Life Example:**
+Modern smartphone vs old keypad phone.
 
-`useReducer` is a React Hook used for **complex state management**. It is an alternative to `useState` when state logic becomes complicated.
-
-### Syntax
+**Working Example:**
 
 ```jsx
-const [state, dispatch] = useReducer(reducer, initialState);
+function User() {
+  return <h1>User</h1>;
+}
 ```
 
-- **state** → current state
-- **dispatch** → function to update state
-- **reducer** → function containing update logic
-- **initialState** → initial value
-
----
-
-## Real-World Example: Shopping Cart
-
-### Reducer Function
-
 ```jsx
-const reducer = (state, action) => {
-  switch (action.type) {
-    case "ADD_ITEM":
-      return {
-        ...state,
-        count: state.count + 1,
-      };
-
-    case "REMOVE_ITEM":
-      return {
-        ...state,
-        count: state.count - 1,
-      };
-
-    default:
-      return state;
+class User extends React.Component {
+  render() {
+    return <h1>User</h1>;
   }
-};
-```
-
----
-
-### Component
-
-```jsx
-import React, { useReducer } from "react";
-
-const initialState = {
-  count: 0,
-};
-
-function Cart() {
-  const [state, dispatch] = useReducer(reducer, initialState);
-
-  return (
-    <div>
-      <h2>Cart Items: {state.count}</h2>
-
-      <button onClick={() => dispatch({ type: "ADD_ITEM" })}>Add Item</button>
-
-      <button onClick={() => dispatch({ type: "REMOVE_ITEM" })}>
-        Remove Item
-      </button>
-    </div>
-  );
-}
-
-export default Cart;
-```
-
----
-
-### Flow
-
-When user clicks:
-
-```jsx
-dispatch({ type: "ADD_ITEM" });
-```
-
-React calls:
-
-```jsx
-reducer(state, { type: "ADD_ITEM" });
-```
-
-Returns:
-
-```jsx
-{
-  count: state.count + 1;
 }
 ```
 
-and updates the UI.
+---
+
+## 7. What are props in React?
+
+**Answer:**
+Props are read-only data passed from parent to child components.
+
+**Real-Life Example:**
+Parents giving instructions to children.
+
+**Working Example:**
+
+```jsx
+function User(props) {
+  return <h1>{props.name}</h1>;
+}
+
+<User name="Prakash" />;
+```
 
 ---
 
-## Why use `useReducer` instead of `useState`?
+## 8. What is state in React?
 
-### With `useState`
+**Answer:**
+State stores component-specific data that can change over time.
+
+**Real-Life Example:**
+A score board that updates during a match.
+
+**Working Example:**
+
+```jsx
+const [count, setCount] = useState(0);
+```
+
+---
+
+## 9. What is the difference between props and state?
+
+| Props              | State                    |
+| ------------------ | ------------------------ |
+| Passed from parent | Managed inside component |
+| Read-only          | Mutable                  |
+| External Data      | Internal Data            |
+
+**Real-Life Example:**
+Props = Instructions from manager.
+State = Employee's current task.
+
+---
+
+## 10. What are controlled and uncontrolled components?
+
+**Answer:**
+Controlled components use React state. Uncontrolled components use DOM refs.
+
+**Real-Life Example:**
+Controlled = Teacher monitors attendance.
+Uncontrolled = Students mark attendance themselves.
+
+**Working Example:**
 
 ```jsx
 const [name, setName] = useState("");
-const [email, setEmail] = useState("");
-const [loading, setLoading] = useState(false);
-const [error, setError] = useState("");
 ```
 
-Too many state updates become hard to manage.
-
-### With `useReducer`
+Uncontrolled:
 
 ```jsx
-const initialState = {
-  name: "",
-  email: "",
-  loading: false,
-  error: "",
-};
+const inputRef = useRef();
 ```
 
-All related state is managed in one place through the reducer.
+---
+
+## 11. What are React Hooks?
+
+**Answer:**
+Hooks allow functional components to use state and lifecycle features.
+
+**Real-Life Example:**
+Adding new tools to an existing toolbox.
+
+**Working Example:**
+
+```jsx
+const [count, setCount] = useState(0);
+```
 
 ---
 
-## Interview Answer
+## 12. What is the purpose of useState?
 
-> `useReducer` is a React Hook used for managing complex state logic. It works similarly to Redux by using a reducer function and dispatching actions to update state. It is preferred over `useState` when multiple state values are related or when state transitions become complex, such as in forms, shopping carts, authentication flows, and dashboards.
+**Answer:**
+useState creates and manages state inside functional components.
 
-### Quick Comparison
+**Real-Life Example:**
+A digital counter.
 
-| useState              | useReducer                   |
-| --------------------- | ---------------------------- |
-| Simple state          | Complex state                |
-| Direct updates        | Action-based updates         |
-| Easy to learn         | Better for large logic       |
-| `setState()`          | `dispatch()`                 |
-| Counter, Input fields | Cart, Forms, Auth, Dashboard |
+**Working Example:**
 
-**Rule of thumb:**
-
-- Use `useState` for simple state.
-- Use `useReducer` when state has multiple fields and complex update logic.
-
-### Difference Between `useEffect` and `useLayoutEffect`
-
-Both hooks are used for side effects, but the **timing** is different.
-
-| useEffect                                    | useLayoutEffect                                |
-| -------------------------------------------- | ---------------------------------------------- |
-| Runs **after** the browser paints the screen | Runs **before** the browser paints the screen  |
-| Non-blocking                                 | Blocking                                       |
-| Better for API calls, subscriptions, timers  | Better for DOM measurements and layout updates |
-| Doesn't affect visual rendering              | Can prevent UI flickering                      |
+```jsx
+const [count, setCount] = useState(0);
+```
 
 ---
 
-### `useEffect` Example
+## 13. How does useEffect work?
+
+**Answer:**
+useEffect runs side effects after rendering.
+
+**Real-Life Example:**
+Sending an email after registration completes.
+
+**Working Example:**
 
 ```jsx
 useEffect(() => {
-  console.log("Fetching data...");
-}, []);
-```
-
-Flow:
-
-```text
-Render Component
-↓
-Browser Paints UI
-↓
-useEffect Runs
-```
-
-Use Cases:
-
-- API calls
-- Event listeners
-- Timers
-- Local Storage
-
----
-
-### `useLayoutEffect` Example
-
-```jsx
-useLayoutEffect(() => {
-  const width = divRef.current.offsetWidth;
-  console.log(width);
-}, []);
-```
-
-Flow:
-
-```text
-Render Component
-↓
-useLayoutEffect Runs
-↓
-Browser Paints UI
-```
-
-Use Cases:
-
-- Measuring element size
-- Calculating positions
-- Updating styles before paint
-- Preventing flickering
-
----
-
-### Real-World Example
-
-Suppose you're building a tooltip:
-
-```jsx
-useLayoutEffect(() => {
-  const height = tooltipRef.current.offsetHeight;
-
-  tooltipRef.current.style.top = `${-height}px`;
-}, []);
-```
-
-If you use `useEffect`, the tooltip may briefly appear in the wrong position and then jump.
-
-With `useLayoutEffect`, the position is calculated before the user sees it.
-
----
-
-### Interview Answer
-
-> `useEffect` runs asynchronously after the component is rendered and painted to the screen, making it suitable for API calls, subscriptions, and timers. `useLayoutEffect` runs synchronously after the DOM is updated but before the browser paints, making it useful for DOM measurements and layout changes where visual flickering must be avoided. In most cases, `useEffect` is preferred because it does not block rendering.
-
-### Real-Life Use Cases of `useLayoutEffect`
-
-You will rarely use `useLayoutEffect`. Most applications use `useEffect`. Use `useLayoutEffect` only when you need to **read or update the DOM before the user sees it**.
-
----
-
-## 1. Tooltip Positioning (Most Common)
-
-Imagine a tooltip that appears above a button.
-
-```jsx
-useLayoutEffect(() => {
-  const tooltipHeight = tooltipRef.current.offsetHeight;
-
-  tooltipRef.current.style.top = `-${tooltipHeight}px`;
-}, []);
-```
-
-### Why?
-
-Without `useLayoutEffect`:
-
-```text
-Tooltip appears
-↓
-User sees wrong position
-↓
-Position updates
-```
-
-This causes a flicker.
-
-With `useLayoutEffect`:
-
-```text
-Calculate position
-↓
-Update DOM
-↓
-Paint screen
-```
-
-User never sees the wrong position.
-
----
-
-## 2. Auto-Resizing Textarea
-
-Like WhatsApp or ChatGPT input boxes.
-
-```jsx
-useLayoutEffect(() => {
-  textareaRef.current.style.height = "0px";
-
-  const scrollHeight = textareaRef.current.scrollHeight;
-
-  textareaRef.current.style.height = `${scrollHeight}px`;
-}, [text]);
-```
-
-When the user types, the textarea grows smoothly before painting.
-
----
-
-## 3. Scroll to Bottom in Chat Applications
-
-```jsx
-useLayoutEffect(() => {
-  messagesEndRef.current?.scrollIntoView();
-}, [messages]);
-```
-
-Used in:
-
-- WhatsApp
-- Telegram
-- Messenger
-- Slack
-
-Ensures the latest message is visible immediately.
-
----
-
-## 4. Measuring Element Size
-
-```jsx
-useLayoutEffect(() => {
-  const width = cardRef.current.offsetWidth;
-
-  setCardWidth(width);
-}, []);
-```
-
-Used in:
-
-- Responsive dashboards
-- Charts
-- Data grids
-- Drag-and-drop libraries
-
----
-
-## 5. Animations
-
-Libraries like:
-
-- [GSAP](https://gsap.com?utm_source=chatgpt.com)
-- [Framer Motion](https://www.framer.com/motion/?utm_source=chatgpt.com)
-
-often need DOM measurements before animations start.
-
-```jsx
-useLayoutEffect(() => {
-  const position = boxRef.current.getBoundingClientRect();
-
-  startAnimation(position);
+  console.log("Mounted");
 }, []);
 ```
 
 ---
 
-## Interview Answer
+## 14. What is the dependency array in useEffect?
 
-> A real-world use of `useLayoutEffect` is positioning tooltips, modals, dropdowns, or chat auto-scroll functionality. It runs after the DOM is updated but before the browser paints the screen, allowing us to measure DOM elements and make layout adjustments without causing visual flickering. Most applications use `useEffect`, while `useLayoutEffect` is reserved for DOM measurement and layout-related tasks.
+**Answer:**
+The dependency array controls when useEffect runs.
 
-### How does Context API differ from Redux?
+**Real-Life Example:**
+An alarm that triggers only when a specific condition changes.
 
-Both are used for **state management**, but they solve different problems.
-
-| Context API                        | Redux                                   |
-| ---------------------------------- | --------------------------------------- |
-| Built into React                   | External library                        |
-| Good for small/medium global state | Good for large and complex state        |
-| Easy to set up                     | More setup required                     |
-| No middleware support              | Supports middleware (Thunk, Saga, etc.) |
-| Can cause unnecessary re-renders   | Better optimized for large apps         |
-| Mainly for sharing data            | Complete state management solution      |
-
----
-
-## Context API Example
-
-Used for:
-
-- Theme (Light/Dark)
-- Language
-- Logged-in User
-- Authentication
+**Working Example:**
 
 ```jsx
-<ThemeContext.Provider value={{ theme, toggleTheme }}>
-  <App />
-</ThemeContext.Provider>
-```
-
-Access anywhere:
-
-```jsx
-const { theme } = useContext(ThemeContext);
+useEffect(() => {
+  console.log(count);
+}, [count]);
 ```
 
 ---
 
-## Redux Example
+## 15. What are common mistakes when using useEffect?
 
-Used for:
+**Answer:**
 
-- Shopping Cart
-- Products
-- Orders
-- User Profile
-- Notifications
-- Dashboard Data
+- Missing dependencies
+- Infinite loops
+- Forgetting cleanup
+- Updating state unnecessarily
 
-```jsx
-dispatch(addToCart(product));
-```
+**Real-Life Example:**
+Setting multiple alarms for the same event.
 
-Access state:
+**Working Example:**
 
 ```jsx
-const cartItems = useSelector((state) => state.cart.items);
+useEffect(() => {
+  return () => {
+    console.log("Cleanup");
+  };
+}, []);
 ```
 
 ---
 
-## Real-World Example
+## 16. What is the difference between useEffect and useLayoutEffect?
 
-### E-commerce Application
+**Answer:**
 
-#### Context API
+- useEffect runs after painting.
+- useLayoutEffect runs before painting.
 
-```text
-Theme
-Language
-Logged-in User
-```
+**Real-Life Example:**
 
-These values change infrequently and are needed globally.
+- useEffect = Fix after customer sees it.
+- useLayoutEffect = Fix before customer sees it.
 
-#### Redux
-
-```text
-Cart
-Products
-Wishlist
-Orders
-Payment Status
-```
-
-Many components update these states frequently.
-
-Redux handles this more efficiently.
-
----
-
-## Why Redux for Large Apps?
-
-Suppose:
-
-```text
-App
- ├── Header
- ├── Sidebar
- ├── ProductList
- ├── Cart
- └── Checkout
-```
-
-When cart data changes:
-
-### Context API
-
-All consumers of that context may re-render.
-
-### Redux
-
-Only components subscribed to the changed slice re-render.
-
-This improves performance in large applications.
-
----
-
-## Interview Answer (Short)
-
-> Context API is a built-in React feature used for sharing global data such as themes, authentication, and language settings. Redux is a dedicated state management library that provides a centralized store, predictable state updates, middleware support, and better scalability for large applications. Context API is suitable for simple global state, whereas Redux is preferred for complex and frequently changing application state.
-
-**React.Fragment** is a React component that lets you group multiple elements **without adding an extra HTML tag** to the DOM.
-
-### Why use it?
-
-Sometimes a component needs to return multiple elements, but you don't want unnecessary `<div>` wrappers.
-
-### Example
-
-❌ Without Fragment:
+**Working Example:**
 
 ```jsx
-function User() {
-  return (
-    <div>
-      <h1>Prakash</h1>
-      <p>Developer</p>
-    </div>
-  );
+useLayoutEffect(() => {
+  console.log("Before Paint");
+});
+```
+
+---
+
+## 17. What is the purpose of useRef?
+
+**Answer:**
+useRef stores mutable values without causing re-renders.
+
+**Real-Life Example:**
+A notebook that doesn't trigger notifications when updated.
+
+**Working Example:**
+
+```jsx
+const inputRef = useRef();
+```
+
+---
+
+## 18. What is the difference between useRef and useState?
+
+| useRef        | useState         |
+| ------------- | ---------------- |
+| No re-render  | Causes re-render |
+| Mutable value | State value      |
+| DOM Access    | UI Updates       |
+
+**Real-Life Example:**
+Notebook vs digital display board.
+
+---
+
+## 19. What is the purpose of useMemo?
+
+**Answer:**
+useMemo caches expensive calculations to improve performance.
+
+**Real-Life Example:**
+Saving frequently used calculations in a calculator.
+
+**Working Example:**
+
+```jsx
+const total = useMemo(() => {
+  return calculateTotal(items);
+}, [items]);
+```
+
+---
+
+## 20. What is the purpose of useCallback?
+
+**Answer:**
+useCallback caches functions to prevent unnecessary recreation.
+
+**Real-Life Example:**
+Reusing the same key instead of making a new one every time.
+
+**Working Example:**
+
+```jsx
+const handleClick = useCallback(() => {
+  console.log("Clicked");
+}, []);
+```
+
+---
+
+## 21. What is React Context API?
+
+**Answer:**
+Context API shares data across components without passing props manually.
+
+**Real-Life Example:**
+A company notice board accessible by everyone.
+
+**Working Example:**
+
+```jsx
+const UserContext = createContext();
+```
+
+---
+
+## 22. How does Context API differ from Redux?
+
+| Context API          | Redux                    |
+| -------------------- | ------------------------ |
+| Simple state sharing | Complex state management |
+| Built into React     | External library         |
+| Small-Medium Apps    | Large Apps               |
+
+**Real-Life Example:**
+Local office notice board vs company-wide management system.
+
+---
+
+## 23. What are custom hooks?
+
+**Answer:**
+Custom hooks allow reusable stateful logic.
+
+**Real-Life Example:**
+Creating your own utility tool.
+
+**Working Example:**
+
+```jsx
+function useCounter() {
+  const [count, setCount] = useState(0);
+
+  return { count, setCount };
 }
 ```
 
-✅ With Fragment:
+---
+
+## 24. What is prop drilling?
+
+**Answer:**
+Prop drilling occurs when props are passed through many components unnecessarily.
+
+**Real-Life Example:**
+Passing a message through multiple people to reach one person.
+
+**Solution:**
+Use Context API or Redux.
+
+---
+
+## 25. What are Higher-Order Components (HOCs)?
+
+**Answer:**
+A HOC is a function that takes a component and returns an enhanced component.
+
+**Real-Life Example:**
+Adding extra features to a car.
+
+**Working Example:**
 
 ```jsx
-function User() {
+const Enhanced = withAuth(Component);
+```
+
+---
+
+# Quick Revision Formula
+
+```text
+React = UI Library
+
+Core Concepts:
+Components
+Props
+State
+Hooks
+
+Performance:
+Virtual DOM
+Reconciliation
+useMemo
+useCallback
+
+State Sharing:
+Props
+Context API
+Redux
+
+Hooks:
+useState
+useEffect
+useRef
+useMemo
+useCallback
+
+Optimization:
+React.memo
+Lazy Loading
+Code Splitting
+```
+
+### Most Asked React Topics
+
+```text
+1. Virtual DOM
+2. Reconciliation
+3. Props vs State
+4. useEffect
+5. useMemo vs useCallback
+6. Context API
+7. React.memo
+8. React Lifecycle
+9. Re-rendering
+10. Performance Optimization
+```
+
+**Part 2** will cover questions **26–50**, including:
+
+- Render Props
+- Fragments
+- Keys
+- Conditional Rendering
+- React.memo
+- Batching
+- SSR vs CSR
+- Hydration
+- Suspense
+- Error Boundaries
+- Fiber Architecture
+- Hooks Internals
+- Stale Closures
+- Race Conditions
+- Portals
+- Scalable React Architecture
+- React Senior-Level Questions (most asked in 5+ YOE interviews)
+
+# React Interview Questions & Answers (Part 2/2)
+
+---
+
+## 26. What are render props?
+
+**Answer:**
+A Render Prop is a technique where a component shares logic by passing a function as a prop.
+
+**Real-Life Example:**
+A chef gives ingredients, and customers decide how to prepare the dish.
+
+**Working Example:**
+
+```jsx id="p6v3n8"
+function DataProvider({ render }) {
+  return render("React");
+}
+
+<DataProvider render={(data) => <h1>{data}</h1>} />;
+```
+
+---
+
+## 27. What is React.Fragment and why is it used?
+
+**Answer:**
+React.Fragment lets you group multiple elements without adding extra DOM nodes.
+
+**Real-Life Example:**
+Using a folder to organize papers without adding another page.
+
+**Working Example:**
+
+```jsx id="2uh6g4"
+<>
+  <h1>Hello</h1>
+  <p>World</p>
+</>
+```
+
+---
+
+## 28. What are keys in React lists and why are they important?
+
+**Answer:**
+Keys help React identify which list items changed, were added, or removed.
+
+**Real-Life Example:**
+Employee ID numbers used to identify employees.
+
+**Working Example:**
+
+```jsx id="w2x8v9"
+users.map((user) => <li key={user.id}>{user.name}</li>);
+```
+
+---
+
+## 29. What is conditional rendering in React?
+
+**Answer:**
+Conditional rendering displays UI based on conditions.
+
+**Real-Life Example:**
+Showing the admin panel only to admins.
+
+**Working Example:**
+
+```jsx id="j5m1q3"
+{
+  isLoggedIn ? <Dashboard /> : <Login />;
+}
+```
+
+---
+
+## 30. What is lifting state up in React?
+
+**Answer:**
+Lifting state up means moving state to the closest common parent so multiple components can share it.
+
+**Real-Life Example:**
+Parents keeping information and sharing it with children.
+
+**Working Example:**
+
+```jsx id="v7n4c2"
+function Parent() {
+  const [name, setName] = useState("");
+
   return (
     <>
-      <h1>Prakash</h1>
-      <p>Developer</p>
+      <Child1 name={name} />
+      <Child2 setName={setName} />
     </>
   );
 }
 ```
 
-### Real-life example
+---
 
-<></> called react fregment
+# Frequently Asked in Mid/Senior React Interviews
 
-Think of **React.Fragment** like a **transparent folder** that holds multiple papers together. The papers stay organized, but the folder itself is invisible and doesn't take up any space.
+---
+
+## 31. What causes a React component to re-render?
+
+**Answer:**
+
+A component re-renders when:
+
+- State changes
+- Props change
+- Context changes
+- Parent re-renders
+
+**Real-Life Example:**
+A scoreboard updates whenever the score changes.
+
+**Working Example:**
+
+```jsx id="f8z2k5"
+setCount(count + 1);
+```
+
+---
+
+## 32. How can you optimize React application performance?
+
+**Answer:**
+
+Common techniques:
+
+- React.memo
+- useMemo
+- useCallback
+- Code Splitting
+- Lazy Loading
+- Virtualization
+
+**Real-Life Example:**
+Caching frequently used data instead of recalculating.
+
+**Working Example:**
+
+```jsx id="m3x7r1"
+const total = useMemo(() => {
+  return calculateTotal(items);
+}, [items]);
+```
+
+---
+
+## 33. What is React.memo and when should you use it?
+
+**Answer:**
+React.memo prevents unnecessary re-renders if props haven't changed.
+
+**Real-Life Example:**
+Reusing an existing report instead of generating it again.
+
+**Working Example:**
+
+```jsx id="q9v5n8"
+const User = React.memo(function User({ name }) {
+  return <h1>{name}</h1>;
+});
+```
+
+---
+
+## 34. How does React's batching mechanism work?
+
+**Answer:**
+React groups multiple state updates into a single re-render to improve performance.
+
+**Real-Life Example:**
+Completing multiple bank transactions together instead of individually.
+
+**Working Example:**
+
+```jsx id="t4c8m6"
+setCount((c) => c + 1);
+setName("John");
+```
+
+React performs one render.
+
+---
+
+## 35. What is the difference between Client-Side Rendering (CSR) and Server-Side Rendering (SSR)?
+
+| CSR                   | SSR                |
+| --------------------- | ------------------ |
+| Rendered in Browser   | Rendered on Server |
+| Slower first load     | Faster first load  |
+| Better SPA experience | Better SEO         |
+
+**Real-Life Example:**
+
+CSR = Cooking food at home.
+SSR = Food delivered ready to eat.
+
+---
+
+## 36. What is hydration in React?
+
+**Answer:**
+Hydration attaches React functionality to HTML generated on the server.
+
+**Real-Life Example:**
+Installing electronics into a fully built car.
+
+**Working Example:**
+
+```jsx id="h2w7p4"
+hydrateRoot(document.getElementById("root"), <App />);
+```
+
+---
+
+## 37. What is Concurrent Rendering in React?
+
+**Answer:**
+Concurrent Rendering allows React to pause, resume, and prioritize rendering work.
+
+**Real-Life Example:**
+A manager handling urgent tasks before less important ones.
+
+**Working Example:**
+
+```jsx id="r6y9k2"
+const [isPending, startTransition] = useTransition();
+```
+
+---
+
+## 38. What are React Suspense and lazy loading?
+
+**Answer:**
+Lazy loading loads components only when needed. Suspense shows fallback UI while loading.
+
+**Real-Life Example:**
+Downloading a movie only when you click Play.
+
+**Working Example:**
+
+```jsx id="x5m8c1"
+const Dashboard = React.lazy(() => import("./Dashboard"));
+```
+
+```jsx id="n7p2v5"
+<Suspense fallback={<p>Loading...</p>}>
+  <Dashboard />
+</Suspense>
+```
+
+---
+
+## 39. What are Error Boundaries and when should they be used?
+
+**Answer:**
+Error Boundaries catch JavaScript errors in child components and display fallback UI.
+
+**Real-Life Example:**
+A circuit breaker preventing the whole building from losing power.
+
+**Working Example:**
+
+```jsx id="z4k6n9"
+class ErrorBoundary extends React.Component {
+  componentDidCatch(error) {
+    console.log(error);
+  }
+}
+```
+
+---
+
+## 40. Explain the React component lifecycle and equivalent Hooks.
+
+**Answer:**
+
+### Mounting
+
+```jsx id="d3x7m8"
+useEffect(() => {
+  console.log("Mounted");
+}, []);
+```
+
+### Updating
+
+```jsx id="j8v2c6"
+useEffect(() => {
+  console.log("Updated");
+}, [count]);
+```
+
+### Unmounting
+
+```jsx id="s5m9k3"
+useEffect(() => {
+  return () => {
+    console.log("Unmounted");
+  };
+}, []);
+```
+
+**Real-Life Example:**
+
+- Mount = Employee joins company
+- Update = Employee changes role
+- Unmount = Employee leaves company
+
+---
+
+# Quick Revision Formula
+
+```text id="u2k8p4"
+Render Props:
+Function as Prop
+
+Fragment:
+Avoid Extra DOM Nodes
+
+Keys:
+Unique Identifier for Lists
+
+Conditional Rendering:
+if ? true : false
+
+Lifting State Up:
+Move State to Parent
+
+Re-render Causes:
+State Change
+Props Change
+Context Change
+
+Optimization:
+React.memo
+useMemo
+useCallback
+
+Rendering:
+CSR = Browser
+SSR = Server
+
+Hydration:
+Attach React to SSR HTML
+
+Concurrent Rendering:
+Pause & Prioritize Rendering
+
+Suspense:
+Loading UI
+
+Lazy:
+Load Components on Demand
+
+Error Boundary:
+Catch UI Errors
+
+Lifecycle:
+Mount → useEffect([])
+Update → useEffect([dep])
+Unmount → Cleanup Function
+```
+
+---
+
+# Top 10 React Questions Asked in Interviews
+
+```text id="w6p3n7"
+1. Virtual DOM
+2. Reconciliation
+3. Props vs State
+4. useEffect
+5. useMemo vs useCallback
+6. Context API vs Redux
+7. React.memo
+8. SSR vs CSR
+9. Suspense & Lazy Loading
+10. Component Lifecycle
+```
+
+These 10 topics alone cover roughly **70–80% of React interview discussions** for Frontend, React Developer, and Full-Stack roles.
