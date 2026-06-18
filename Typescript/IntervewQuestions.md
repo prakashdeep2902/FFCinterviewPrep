@@ -261,3 +261,679 @@ const inputRef = useRef<HTMLInputElement>(null);
 
 inputRef.current?.focus();
 ```
+
+Perfect for a GitHub README. Save this as **`typescript-interview-notes.md`**.
+
+# TypeScript Interview Notes
+
+## 1. Difference Between TypeScript and JavaScript
+
+| JavaScript               | TypeScript                      |
+| ------------------------ | ------------------------------- |
+| Dynamically typed        | Statically typed                |
+| Errors found at runtime  | Errors found during development |
+| No interfaces            | Supports interfaces             |
+| No type checking         | Strong type checking            |
+| Runs directly in browser | Compiles to JavaScript          |
+
+### Example
+
+```ts
+// JavaScript
+let age = "25";
+age = 30; // Allowed
+
+// TypeScript
+let age: number = 25;
+age = 30; // ✅
+age = "30"; // ❌ Error
+```
+
+---
+
+# 2. type vs interface
+
+### type
+
+```ts
+type User = {
+  name: string;
+  age: number;
+};
+```
+
+### interface
+
+```ts
+interface User {
+  name: string;
+  age: number;
+}
+```
+
+### Difference
+
+| type                      | interface              |
+| ------------------------- | ---------------------- |
+| Can represent unions      | Cannot                 |
+| Can represent primitives  | Cannot                 |
+| More flexible             | Better for OOP         |
+| Cannot merge declarations | Can merge declarations |
+
+### Example
+
+```ts
+type Status = "success" | "error";
+```
+
+```ts
+interface User {
+  name: string;
+}
+
+interface User {
+  age: number;
+}
+
+// Merged automatically
+```
+
+---
+
+# 3. any vs unknown
+
+### any
+
+Turns off TypeScript checking.
+
+```ts
+let value: any = 10;
+
+value.toUpperCase(); // No error
+```
+
+### unknown
+
+Safer version of any.
+
+```ts
+let value: unknown = "Hello";
+
+if (typeof value === "string") {
+  console.log(value.toUpperCase());
+}
+```
+
+### Interview Answer
+
+> Use `unknown` instead of `any` whenever possible because it forces type checking before usage.
+
+---
+
+# 4. Union Types
+
+Allows multiple possible types.
+
+```ts
+let value: string | number;
+
+value = "Hello";
+value = 100;
+```
+
+### Real Example
+
+```ts
+function printId(id: string | number) {
+  console.log(id);
+}
+```
+
+---
+
+# 5. Intersection Types
+
+Combines multiple types.
+
+```ts
+type Person = {
+  name: string;
+};
+
+type Employee = {
+  salary: number;
+};
+
+type Worker = Person & Employee;
+```
+
+```ts
+const emp: Worker = {
+  name: "John",
+  salary: 50000,
+};
+```
+
+---
+
+# 6. Generics
+
+Reusable types.
+
+### Without Generic
+
+```ts
+function getValue(value: string): string {
+  return value;
+}
+```
+
+### With Generic
+
+```ts
+function getValue<T>(value: T): T {
+  return value;
+}
+
+getValue<string>("Hello");
+getValue<number>(100);
+```
+
+### Real Example
+
+```ts
+const numbers: Array<number> = [1, 2, 3];
+```
+
+---
+
+# 7. keyof
+
+Returns keys of an object type.
+
+```ts
+type User = {
+  name: string;
+  age: number;
+};
+
+type UserKeys = keyof User;
+```
+
+Result:
+
+```ts
+"name" | "age";
+```
+
+### Example
+
+```ts
+function getValue(obj: User, key: keyof User) {
+  return obj[key];
+}
+```
+
+---
+
+# 8. typeof
+
+Gets the type of a variable.
+
+```ts
+const user = {
+  name: "Prakash",
+  age: 25,
+};
+
+type UserType = typeof user;
+```
+
+---
+
+# 9. Utility Types
+
+## Partial
+
+Makes all properties optional.
+
+```ts
+interface User {
+  name: string;
+  age: number;
+}
+
+type PartialUser = Partial<User>;
+```
+
+Result:
+
+```ts
+{
+  name?: string;
+  age?: number;
+}
+```
+
+---
+
+## Pick
+
+Select specific properties.
+
+```ts
+type UserName = Pick<User, "name">;
+```
+
+Result:
+
+```ts
+{
+  name: string;
+}
+```
+
+---
+
+## Omit
+
+Remove properties.
+
+```ts
+type UserWithoutAge = Omit<User, "age">;
+```
+
+---
+
+## Readonly
+
+Makes properties immutable.
+
+```ts
+type ReadonlyUser = Readonly<User>;
+
+const user: ReadonlyUser = {
+  name: "John",
+  age: 25,
+};
+
+user.age = 30; // Error
+```
+
+---
+
+# 10. Classes and Access Modifiers
+
+```ts
+class User {
+  public name: string;
+  private password: string;
+  protected age: number;
+
+  constructor(name: string, password: string, age: number) {
+    this.name = name;
+    this.password = password;
+    this.age = age;
+  }
+}
+```
+
+### Modifiers
+
+| Modifier  | Access              |
+| --------- | ------------------- |
+| public    | Everywhere          |
+| private   | Inside class only   |
+| protected | Class + child class |
+
+---
+
+# 11. Function Overloading
+
+Multiple function signatures.
+
+```ts
+function greet(name: string): string;
+function greet(age: number): string;
+
+function greet(value: string | number): string {
+  return `Hello ${value}`;
+}
+```
+
+```ts
+greet("Prakash");
+greet(25);
+```
+
+---
+
+# 12. Enums
+
+Group related constants.
+
+```ts
+enum Role {
+  Admin,
+  User,
+  Guest,
+}
+
+console.log(Role.Admin);
+```
+
+### String Enum
+
+```ts
+enum Status {
+  SUCCESS = "success",
+  ERROR = "error",
+}
+```
+
+---
+
+# 13. Type Assertions
+
+Tell TypeScript what type a value is.
+
+```ts
+const input = document.getElementById("name") as HTMLInputElement;
+
+console.log(input.value);
+```
+
+Alternative:
+
+```ts
+const input = <HTMLInputElement>document.getElementById("name");
+```
+
+---
+
+# 14. Type Inference
+
+TypeScript automatically detects types.
+
+```ts
+let name = "Prakash";
+```
+
+TS infers:
+
+```ts
+string;
+```
+
+```ts
+let age = 25;
+```
+
+TS infers:
+
+```ts
+number;
+```
+
+---
+
+# 15. Abstract Classes
+
+Cannot create objects directly.
+
+```ts
+abstract class Animal {
+  abstract makeSound(): void;
+
+  sleep() {
+    console.log("Sleeping");
+  }
+}
+```
+
+```ts
+class Dog extends Animal {
+  makeSound() {
+    console.log("Bark");
+  }
+}
+```
+
+```ts
+const dog = new Dog();
+```
+
+```ts
+const animal = new Animal(); // Error
+```
+
+---
+
+# 16. Modules
+
+Export and import code.
+
+### user.ts
+
+```ts
+export const name = "Prakash";
+
+export function greet() {
+  console.log("Hello");
+}
+```
+
+### app.ts
+
+```ts
+import { name, greet } from "./user";
+
+greet();
+```
+
+---
+
+# 17. React Props Typing
+
+```tsx
+type ButtonProps = {
+  title: string;
+  disabled?: boolean;
+};
+
+function Button({ title, disabled }: ButtonProps) {
+  return <button disabled={disabled}>{title}</button>;
+}
+```
+
+Usage:
+
+```tsx
+<Button title="Save" />
+```
+
+---
+
+# 18. React useState Typing
+
+### String State
+
+```tsx
+const [name, setName] = useState<string>("");
+```
+
+### Number State
+
+```tsx
+const [count, setCount] = useState<number>(0);
+```
+
+### Object State
+
+```tsx
+type User = {
+  name: string;
+  age: number;
+};
+
+const [user, setUser] = useState<User | null>(null);
+```
+
+---
+
+# 19. React Event Typing
+
+### Input Change Event
+
+```tsx
+const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  console.log(e.target.value);
+};
+```
+
+### Button Click Event
+
+```tsx
+const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  console.log("Clicked");
+};
+```
+
+---
+
+# 20. API Response Typing
+
+### Define Response Type
+
+```ts
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+```
+
+### Fetch Data
+
+```ts
+async function getUsers(): Promise<User[]> {
+  const response = await fetch("/api/users");
+
+  const data: User[] = await response.json();
+
+  return data;
+}
+```
+
+### Axios Example
+
+```ts
+const response = await axios.get<User[]>("/users");
+
+console.log(response.data);
+```
+
+---
+
+# Quick Interview Revision (1 Minute)
+
+### TypeScript vs JavaScript
+
+- TypeScript = JavaScript + Types
+
+### type vs interface
+
+- Interface → Objects & OOP
+- Type → Unions, Intersections, Advanced Types
+
+### any vs unknown
+
+- any = No type checking
+- unknown = Type-safe any
+
+### Union
+
+```ts
+string | number;
+```
+
+### Intersection
+
+```ts
+A & B;
+```
+
+### Generic
+
+```ts
+function test<T>(value: T): T;
+```
+
+### keyof
+
+```ts
+keyof User
+```
+
+### typeof
+
+```ts
+typeof user;
+```
+
+### Utility Types
+
+```ts
+Partial;
+Pick;
+Omit;
+Readonly;
+```
+
+### Access Modifiers
+
+```ts
+public;
+private;
+protected;
+```
+
+### Function Overloading
+
+Multiple signatures, one implementation.
+
+### Enum
+
+Group constants.
+
+### Type Assertion
+
+```ts
+value as Type;
+```
+
+### Type Inference
+
+TS automatically guesses types.
+
+### Abstract Class
+
+Cannot instantiate directly.
+
+### Modules
+
+```ts
+export
+import
+```
+
+### React
+
+```tsx
+Props
+useState<T>()
+Events
+API Typing
+```
+
+These 20 topics cover roughly **80–90% of TypeScript interview questions** asked for React/Frontend Developer roles.
