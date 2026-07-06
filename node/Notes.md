@@ -288,6 +288,31 @@ stream.on("data", (chunk) => {
 });
 ```
 
+```js
+import express from "express";
+import fs from "node:fs";
+import zlib from "node:zlib";
+import statusMonitor from "express-status-monitor";
+
+const app = express();
+const PORT = 5000;
+
+app.use(statusMonitor());
+
+// Compress file
+fs.createReadStream("./bigData.json")
+  .pipe(zlib.createGzip())
+  .pipe(fs.createWriteStream("./bigData.json.gz"));
+
+app.get("/", (req, res) => {
+  res.json({ msg: "hello" });
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on ${PORT}`);
+});
+```
+
 ---
 
 ## 14. What are the different types of streams?
