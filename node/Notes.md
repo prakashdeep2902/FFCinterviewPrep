@@ -222,6 +222,19 @@ function greet(callback) {
 greet(() => console.log("Callback Executed"));
 ```
 
+```js
+function greet(name, callback) {
+  console.log("Hello " + name);
+  callback();
+}
+
+function sayBye() {
+  console.log("Goodbye!");
+}
+
+greet("Prakash", sayBye);
+```
+
 ---
 
 ## 11. What are Promises and async/await in Node.js?
