@@ -313,6 +313,20 @@ app.listen(PORT, () => {
 });
 ```
 
+```js
+import express from "express";
+import fs from "node:fs";
+import { pipeline } from "node:stream/promises";
+import zlib from "node:zlib";
+import statusMonitor from "express-status-monitor";
+
+await pipeline(
+  fs.createReadStream("./bigData.json"),
+  zlib.createGzip(),
+  fs.createWriteStream("./bigData.json.gz"),
+);
+```
+
 ---
 
 ## 14. What are the different types of streams?
