@@ -94,7 +94,7 @@ console.log("Server Running");
 ## 5. What is the Event Loop in Node.js?
 
 **Answer:**
-The Event Loop continuously checks the call stack and callback queue and executes pending tasks.
+The Event Loop is a mechanism in Node.js that continuously checks whether asynchronous tasks are completed. If a task is finished, it moves its callback to the Call Stack for execution. This allows Node.js to handle many requests without blocking the main thread.
 
 **Real-Life Example:**
 A manager checking a task queue and assigning work whenever free.
@@ -109,6 +109,45 @@ setTimeout(() => {
 }, 0);
 
 console.log("End");
+
+
+            JavaScript Program
+                    │
+                    ▼
+              +-------------+
+              | Call Stack  |
+              +-------------+
+                    │
+        ┌───────────┴───────────┐
+        │                       │
+        ▼                       ▼
+Synchronous Code         Asynchronous Code
+        │                       │
+Execute Immediately             ▼
+                          Node.js APIs
+                     (Timer/File/HTTP/etc.)
+                                │
+                        Wait Until Complete
+                                │
+                                ▼
+                         Callback Queue
+                                │
+                                ▼
+                         Event Loop
+                                │
+                   Is Call Stack Empty?
+                         │        │
+                        No       Yes
+                         │        │
+                         ▼        ▼
+                      Wait    Move Callback
+                                   │
+                                   ▼
+                              Call Stack
+                                   │
+                                   ▼
+                              Execute Callback
+
 ```
 
 Output:
