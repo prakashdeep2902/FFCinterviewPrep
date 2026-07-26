@@ -73,33 +73,108 @@ ReferenceError
 
 ---
 
-## 4. What are closures and how do they work?
+## Closure
 
-**Answer:**
-A closure allows a function to access variables from its outer scope even after the outer function has finished executing.
+**Definition:**
+A **closure** is a function that **remembers and can access variables from its outer (lexical) scope, even after the outer function has finished executing**.
 
-**Real-Life Example:**
-A child remembers information taught by a parent even after the parent leaves.
+---
 
-**Working Example:**
+### Example
 
-```js
+```javascript
 function outer() {
   let count = 0;
 
-  return function () {
+  return function inner() {
     count++;
     console.log(count);
   };
 }
 
-const increment = outer();
+const counter = outer();
 
-increment();
-increment();
+counter(); // 1
+counter(); // 2
+counter(); // 3
 ```
 
 ---
+
+### How it Works
+
+```javascript
+const counter = outer();
+```
+
+1. `outer()` is called.
+2. `count = 0` is created.
+3. `outer()` returns `inner()`.
+4. Normally, `outer()` would be removed from memory.
+5. But `inner()` is still using `count`, so JavaScript **keeps `count` alive**.
+6. Every time you call `counter()`, it remembers the same `count`.
+
+---
+
+### Output
+
+```text
+1
+2
+3
+```
+
+---
+
+## Real-World Example (Private Variable)
+
+```javascript
+function createBankAccount() {
+  let balance = 0;
+
+  return {
+    deposit(amount) {
+      balance += amount;
+    },
+
+    getBalance() {
+      return balance;
+    },
+  };
+}
+
+const account = createBankAccount();
+
+account.deposit(1000);
+
+console.log(account.getBalance()); // 1000
+```
+
+Here, `balance` is **private**. It can't be accessed directly:
+
+```javascript
+console.log(account.balance); // undefined
+```
+
+Only `deposit()` and `getBalance()` can access it through the closure.
+
+---
+
+## Uses of Closures
+
+- ✅ Data privacy (private variables)
+- ✅ Currying
+- ✅ Memoization (caching)
+- ✅ Debouncing
+- ✅ Throttling
+- ✅ Event handlers
+- ✅ Maintaining state
+
+---
+
+## Easy to Remember
+
+> **Closure = A function + the variables from its lexical scope that it remembers even after the outer function has finished executing.**
 
 ## 5. What is the difference between == and ===?
 
@@ -314,25 +389,94 @@ async function getData() {
 
 ---
 
-## 15. Explain Promise.all(), Promise.allSettled(), Promise.race(), and Promise.any().
+To test `Promise.race()`, create promises that finish at different times. **The first promise to settle (resolve or reject) wins.**
 
-**Answer:**
+### Example 1: First Promise Resolves
 
-- `Promise.all()` → Waits for all promises.
-- `Promise.allSettled()` → Returns all results regardless of success/failure.
-- `Promise.race()` → Returns first completed promise.
-- `Promise.any()` → Returns first successful promise.
+```javascript
+const p1 = new Promise((resolve) => setTimeout(() => resolve("First"), 1000));
 
-**Real-Life Example:**
-Multiple delivery drivers competing to deliver first.
+const p2 = new Promise((resolve) => setTimeout(() => resolve("Second"), 2000));
 
-**Working Example:**
+const p3 = new Promise((resolve) => setTimeout(() => resolve("Third"), 3000));
 
-```js
-Promise.all([Promise.resolve(1), Promise.resolve(2)]).then(console.log);
+Promise.race([p1, p2, p3]).then(console.log);
+```
+
+**Output:**
+
+```text
+First
 ```
 
 ---
+
+### Example 2: First Promise Rejects
+
+```javascript
+const p1 = new Promise((resolve, reject) =>
+  setTimeout(() => reject("Error"), 1000),
+);
+
+const p2 = new Promise((resolve) => setTimeout(() => resolve("Success"), 2000));
+
+Promise.race([p1, p2]).then(console.log).catch(console.error);
+```
+
+**Output:**
+
+```text
+Error
+```
+
+---
+
+### Difference Between `race()` and `any()`
+
+Using the same promises:
+
+```javascript
+const p1 = new Promise((resolve, reject) =>
+  setTimeout(() => reject("Error"), 1000),
+);
+
+const p2 = new Promise((resolve) => setTimeout(() => resolve("Success"), 2000));
+```
+
+#### `Promise.race()`
+
+```javascript
+Promise.race([p1, p2]).then(console.log).catch(console.error);
+```
+
+**Output:**
+
+```text
+Error
+```
+
+Because `p1` **settled first** (it rejected).
+
+---
+
+#### `Promise.any()`
+
+```javascript
+Promise.any([p1, p2]).then(console.log).catch(console.error);
+```
+
+**Output:**
+
+```text
+Success
+```
+
+Because `Promise.any()` **ignores rejected promises** and waits for the first fulfilled one.
+
+### Easy to Remember
+
+- **`Promise.race()`** → **First settled** (resolve **or** reject) wins.
+- **`Promise.any()`** → **First fulfilled** (resolved) wins.
 
 ## 16. What is the this keyword and how does it behave?
 
