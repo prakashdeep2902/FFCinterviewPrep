@@ -270,3 +270,94 @@ Sure, short version:
 "I created a dedicated API service layer — separate functions per domain, like `employeeApi.ts`, `leaveApi.ts` — instead of calling `fetch`/`axios` directly inside components. Each function returned a typed response using shared interfaces, like `Promise<Employee>`, so if the backend response shape changed, TypeScript caught the mismatch immediately during development instead of breaking silently in the UI."
 
 **One-line summary:** "I kept components reusable and typed, used local state/Context instead of over-engineering with Redux, and centralized all API calls in a typed service layer so the UI never talks to APIs directly."
+
+## 11 ) mentioned how to resolve merge conflicts manually. Can you describe a situation where you encountered a complex merge conflict involving multiple files and conflicting changes? How did you approach resolving the conflicts while ensuring no critical updates were lost?
+
+Sure, tying this to the JS-to-TypeScript migration project, where multiple people were touching shared files:
+
+---
+
+"During the migration, a teammate and I were both working on the Employee module around the same time — I was converting components to TypeScript, and they were fixing a bug in the same Employee form file on a different branch. When I merged, I got conflicts across a few files — the component file, the shared `Employee` interface, and one API service file — since both changes touched overlapping lines.
+
+**How I approached it:**
+
+1. **Didn't blindly accept 'ours' or 'theirs'** — I went file by file and actually read both versions to understand intent, not just pick one side to make the conflict go away.
+2. **Started with the shared interface file first** — since other files depended on it, I made sure the `Employee` type included fields from both changes (their bug fix added a new field, my migration added types), so nothing downstream broke.
+3. **Ran the app locally after each file resolution** — instead of resolving all conflicts then testing once, I fixed one file, checked TypeScript compiled without errors, then moved to the next, so I could catch issues early instead of debugging everything at once at the end.
+4. **Talked to my teammate directly** — for one ambiguous conflict, where it wasn't clear if their bug fix logic and my refactor could coexist safely, I just asked them directly instead of guessing, since a 2-minute conversation was faster and safer than assuming intent.
+5. **Tested the actual bug fix still worked** after merging, not just that the code compiled — since a conflict resolving 'cleanly' in Git doesn't mean the logic is still correct.
+
+**One-line summary:** "I resolved conflicts by understanding both changes' intent file by file, prioritized shared/dependency files first, tested incrementally instead of all at once, and directly confirmed with my teammate on any ambiguous overlap instead of guessing — so we kept both the bug fix and the migration intact."
+
+## 12 ) Imagine you are tasked with setting up a CI/CD pipeline for a React application deployed on AWS. How would you design the pipeline to include steps for building. testing, and deploying the application? Please explain the tools you would use, the process flow, and how you would handle error detection and rollback during deployment.
+
+Sure, short and structured:
+
+---
+
+**Tools:** GitHub Actions for CI/CD, AWS (S3 + CloudFront for static hosting, or ECS/EC2 if it's server-rendered like Next.js), Docker for containerizing if needed.
+
+**Pipeline flow:**
+
+```
+Push/PR to main
+      ↓
+1. Install deps (npm ci)
+      ↓
+2. Lint + Type check (tsc --noEmit)
+      ↓
+3. Run tests (Jest/Vitest, Playwright for E2E)
+      ↓
+4. Build (npm run build)
+      ↓
+5. Build Docker image (if containerized) / build static assets
+      ↓
+6. Deploy to staging first
+      ↓
+7. Run smoke tests on staging
+      ↓
+8. Manual approval / auto-promote to production
+      ↓
+9. Deploy to production (S3+CloudFront invalidate, or ECS rolling update)
+```
+
+**Error detection:**
+
+- Pipeline fails fast — if lint, type check, or tests fail, deployment stops right there, doesn't even attempt build/deploy.
+- Post-deploy smoke tests (hit a few key routes/API health checks) on staging before promoting to prod.
+- Monitoring (CloudWatch or similar) watches error rates/latency right after prod deploy.
+
+**Rollback strategy:**
+
+- Keep the previous build artifact/Docker image tagged and available.
+- If deploying to ECS — do a rolling deployment, and if health checks fail, auto-rollback to previous task definition.
+- If static (S3/CloudFront) — keep the previous build folder, and rollback is just re-pointing to the last known-good build, plus a CloudFront cache invalidation.
+- Always deploy to staging first, never straight to production, so most issues get caught before real users see them.
+
+**One-line summary:** "Fail fast on lint/type/test errors before build, deploy to staging first with smoke tests, then promote to production with monitoring in place, and keep the previous build/image ready so rollback is just switching back to the last known-good version."
+
+## 13 ) Imagine you are leading the migration of a large-scale, legacy monolithic web application to a modern micro-frontend architecture using React and TypeScript. First, what key factors and metrics would you evaluate before deciding on micro-frontends versus a modular monolith? Second, how would you handle cross-cutting concerns, such as state management, shared Ul component libraries, and authentication, without tightly coupling the independent micro-apps? Whenever you're ready
+
+Sure, short and structured:
+
+---
+
+**Factors/metrics before choosing micro-frontends vs modular monolith:**
+
+- **Team size & ownership** — micro-frontends make sense mainly if multiple independent teams need to ship separately without blocking each other. If it's one team, a modular monolith is usually simpler and faster.
+- **Deployment frequency per module** — if some modules (like Payroll) change rarely but others (like Dashboard) change daily, splitting lets teams deploy independently instead of one slow release train.
+- **Bundle size / performance impact** — micro-frontends can increase duplicate dependencies (React loaded multiple times) if not managed well, so I'd check if module federation or shared deps can control this.
+- **Coupling level today** — I'd audit how tightly current modules share state/components. High coupling means migration cost is high, and a modular monolith (clear internal boundaries, same repo) might get 80% of the benefit with far less complexity.
+- **Operational maturity** — micro-frontends need more infra (independent CI/CD, versioning, monitoring per app) — I'd check if the team/org is ready to maintain that overhead.
+
+I wouldn't jump to micro-frontends by default — I'd only recommend it if team-autonomy and independent-deploy needs are real, not just because it sounds modern.
+
+---
+
+**Handling cross-cutting concerns without tight coupling:**
+
+- **State management** — avoid one giant shared global store across micro-apps. Keep each micro-app's internal state local. For truly shared state (like logged-in user), use a small shared "shell" context or lightweight pub-sub, not a shared Redux store everyone directly imports.
+- **Shared UI components** — publish a versioned shared component library (like an internal npm package), so each micro-app pulls a specific version, instead of directly referencing another app's components. This avoids one team's UI change breaking another team's app unexpectedly.
+- **Authentication** — handle auth once, at the shell/host app level — validate JWT and pass identity/role down to micro-apps via props or a shared minimal auth context, instead of each micro-app independently handling login. This keeps security centralized instead of duplicated and inconsistent across apps.
+
+**One-line summary:** "I'd only move to micro-frontends if team autonomy and independent deploys are a real need, not by default — and I'd keep cross-cutting concerns like auth centralized at the shell level, state scoped locally per app, and UI components shared via a versioned library instead of direct imports, to avoid tight coupling."
