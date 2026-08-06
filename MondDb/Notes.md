@@ -910,3 +910,522 @@ session.endSession();
 ### Interview Point ⭐
 
 A transaction in MongoDB is simply a group of normal commands (`insertOne`, `updateOne`, `deleteOne`, etc.) executed inside a transaction. If any command fails, `abortTransaction()` rolls back all the previous operations.
+
+## What is a Replica Set?
+
+### 1. What is it?
+
+A **Replica Set** is a group of MongoDB servers that store the **same data** to provide **high availability** and **automatic failover**.
+
+---
+
+### 2. Why do we use it?
+
+- Prevent data loss
+- Automatic failover
+- High availability
+
+---
+
+### 3. Structure
+
+```text
+          Client
+             |
+         Primary
+        /       \
+ Secondary   Secondary
+```
+
+- **Primary** → Handles all write operations.
+- **Secondary** → Copies data from the Primary.
+- If the Primary goes down, one Secondary automatically becomes the new Primary.
+
+---
+
+### 4. Example
+
+Suppose you insert:
+
+```javascript
+db.payment.insertOne({
+  paymentId: "PAY101",
+  amount: 500,
+});
+```
+
+The write goes to the **Primary**.
+
+MongoDB automatically replicates the same document to all **Secondary** nodes.
+
+---
+
+### 5. Interview Point ⭐
+
+- **Primary** → Reads & Writes (by default)
+- **Secondary** → Replicates data, can serve reads if configured
+- Provides **automatic failover**
+
+> **One-line interview answer:**
+> **"A Replica Set is a group of MongoDB servers that maintain identical copies of data. One node acts as the Primary for writes, while Secondary nodes replicate the data and can automatically take over if the Primary fails."**
+
+## What is Sharding?
+
+### 1. What is it?
+
+**Sharding** is a way to **split a large collection across multiple servers**.
+
+---
+
+### 2. Why do we use it?
+
+- Handle very large amounts of data.
+- Improve performance.
+- Scale horizontally.
+
+---
+
+### 3. Example
+
+Suppose your `payment` collection has **100 million documents**.
+
+Instead of storing all data on one server:
+
+```text
+Server 1 → PAY1 - PAY30000000
+Server 2 → PAY30000001 - PAY60000000
+Server 3 → PAY60000001 - PAY100000000
+```
+
+Each server stores only a part of the data.
+
+---
+
+### 4. Key Term
+
+**Shard Key** → The field MongoDB uses to decide which shard stores a document.
+
+Example:
+
+```javascript
+sh.shardCollection("ecommerce.payment", { paymentId: 1 });
+```
+
+Here, `paymentId` is the **Shard Key**.
+
+---
+
+### 5. Interview Point ⭐
+
+- **Replica Set** → Copies the **same data** to multiple servers (High Availability).
+- **Sharding** → Splits **different data** across multiple servers (Scalability).
+
+> **One-line interview answer:**
+> **"Sharding is MongoDB's horizontal scaling technique that distributes data across multiple servers using a shard key, allowing the database to handle very large datasets and high traffic."**
+
+## How do you optimize slow queries?
+
+### 1. How do we optimize?
+
+- Create indexes.
+- Return only required fields.
+- Avoid full collection scans.
+- Use `explain()` to analyze queries.
+- Use aggregation efficiently.
+
+---
+
+### 2. Example
+
+❌ Slow query (no index)
+
+```javascript
+db.payment.find({ paymentId: "PAY1006" });
+```
+
+Create an index:
+
+```javascript
+db.payment.createIndex({ paymentId: 1 });
+```
+
+Now the same query is much faster.
+
+---
+
+### 3. Use `explain()`
+
+```javascript
+db.payment.find({ paymentId: "PAY1006" }).explain("executionStats");
+```
+
+Check:
+
+- `COLLSCAN` ❌ → Slow
+- `IXSCAN` ✅ → Fast
+
+---
+
+### 4. Return only needed fields
+
+❌
+
+```javascript
+db.payment.find({ status: "SUCCESS" });
+```
+
+✅
+
+```javascript
+db.payment.find({ status: "SUCCESS" }, { paymentId: 1, amount: 1, _id: 0 });
+```
+
+---
+
+### 5. Interview Point ⭐
+
+- ✅ Create indexes on frequently searched fields.
+- ✅ Use `explain()` to identify bottlenecks.
+- ✅ Fetch only required fields (projection).
+- ✅ Avoid unnecessary `$lookup` and large aggregations.
+
+> **One-line interview answer:**
+> **"I optimize slow MongoDB queries by creating appropriate indexes, analyzing queries with `explain()`, returning only required fields, and avoiding full collection scans."**
+
+## Difference between `deleteOne()` and `findOneAndDelete()`
+
+### `deleteOne()`
+
+### What is it?
+
+Deletes the first matching document and returns only the delete result.
+
+### Example
+
+```javascript
+db.payment.deleteOne({
+  paymentId: "PAY1006",
+});
+```
+
+**Output**
+
+```javascript
+{
+  acknowledged: true,
+  deletedCount: 1
+}
+```
+
+---
+
+## `findOneAndDelete()`
+
+### What is it?
+
+Finds the matching document, deletes it, and returns the deleted document.
+
+### Example
+
+```javascript
+db.payment.findOneAndDelete({
+  paymentId: "PAY1006",
+});
+```
+
+**Output**
+
+```javascript
+{
+  _id: ObjectId("..."),
+  paymentId: "PAY1006",
+  amount: 999,
+  status: "SUCCESS"
+}
+```
+
+---
+
+## When to use?
+
+- **`deleteOne()`** → When you only want to delete.
+- **`findOneAndDelete()`** → When you need the deleted document (for logging, auditing, or sending a response).
+
+---
+
+## Interview Point ⭐
+
+| `deleteOne()`          | `findOneAndDelete()`                     |
+| ---------------------- | ---------------------------------------- |
+| Deletes document       | Finds, deletes, and returns the document |
+| Returns `deletedCount` | Returns the deleted document             |
+| Slightly lighter       | Useful when you need the deleted data    |
+
+> **One-line interview answer:**
+> **"`deleteOne()` only deletes the document and returns the delete status, whereas `findOneAndDelete()` deletes the document and returns the deleted document itself."**
+
+## What is the purpose of `lean()` in Mongoose?
+
+### 1. What is it?
+
+`lean()` tells Mongoose to return **plain JavaScript objects** instead of full Mongoose documents.
+
+---
+
+### 2. Why do we use it?
+
+- Faster queries.
+- Lower memory usage.
+- Best for read-only operations.
+
+---
+
+### 3. Example
+
+Without `lean()`:
+
+```javascript
+const payments = await Payment.find();
+```
+
+Returns **Mongoose Documents**.
+
+With `lean()`:
+
+```javascript
+const payments = await Payment.find().lean();
+```
+
+Returns **plain JavaScript objects**.
+
+---
+
+### 4. Interview Point ⭐
+
+**Use `lean()` when:**
+
+- ✅ Fetching data only.
+- ✅ Creating APIs that just return JSON.
+- ✅ No need to modify or save the document.
+
+**Don't use `lean()` when:**
+
+- ❌ You need `.save()`.
+- ❌ You rely on Mongoose instance methods, virtuals (unless configured), or middleware.
+
+---
+
+### One-line interview answer
+
+> **"`lean()` improves query performance by returning plain JavaScript objects instead of full Mongoose documents, making it ideal for read-only queries."**
+
+## How do you paginate large collections?
+
+### 1. What is it?
+
+Pagination means **fetching data in small chunks (pages)** instead of loading all documents at once.
+
+---
+
+### 2. Method 1: `skip()` + `limit()` (Simple)
+
+```javascript
+db.payment.find().skip(20).limit(10);
+```
+
+- Skip first **20** documents.
+- Return the next **10** documents.
+
+✅ Good for small datasets.
+
+---
+
+### 3. Method 2: Cursor-based Pagination (Recommended)
+
+```javascript
+db.payment
+  .find({
+    _id: { $gt: ObjectId("6892f4e0a1b2c3d4e5f67890") },
+  })
+  .limit(10);
+```
+
+Uses the last document's `_id` (or another indexed field) to fetch the next page.
+
+✅ Best for large collections.
+
+---
+
+### 4. Interview Point ⭐
+
+- **`skip()` + `limit()`** → Easy but slow for large collections because MongoDB still scans the skipped documents.
+- **Cursor-based pagination** → Faster and more scalable because it uses an index.
+
+> **One-line interview answer:**
+> **"For small datasets, I use `skip()` and `limit()`. For large collections, I prefer cursor-based pagination using an indexed field like `_id` because it's much more efficient."**
+
+## How do you prevent duplicate documents?
+
+### 1. How?
+
+Create a **Unique Index** on the field(s) that must be unique.
+
+---
+
+### 2. Example
+
+Prevent duplicate `paymentId`.
+
+```javascript
+db.payment.createIndex({ paymentId: 1 }, { unique: true });
+```
+
+Now insert:
+
+```javascript
+db.payment.insertOne({
+  paymentId: "PAY1001",
+  amount: 500,
+});
+```
+
+If `PAY1001` already exists, MongoDB throws:
+
+```text
+E11000 duplicate key error
+```
+
+---
+
+### 3. In Mongoose
+
+```javascript
+const paymentSchema = new mongoose.Schema({
+  paymentId: {
+    type: String,
+    unique: true,
+  },
+});
+```
+
+---
+
+### 4. Interview Point ⭐
+
+- ✅ Use a **Unique Index** to prevent duplicate documents.
+- ✅ For payment APIs, also use an **Idempotency Key** to prevent duplicate requests.
+
+> **One-line interview answer:**
+> **"I prevent duplicate documents by creating a unique index on fields that must be unique, such as `paymentId`. For payment systems, I also use idempotency keys to prevent duplicate requests."**
+
+## How would you model users and orders in MongoDB?
+
+### 1. Approach
+
+Use **Referencing**, not Embedding.
+
+---
+
+### 2. Collections
+
+**users**
+
+```javascript
+{
+  _id: ObjectId("U1"),
+  name: "Prakash",
+  email: "prakash@gmail.com"
+}
+```
+
+**orders**
+
+```javascript
+{
+  _id: ObjectId("O1"),
+  userId: ObjectId("U1"),
+  totalAmount: 1500,
+  status: "DELIVERED"
+}
+```
+
+---
+
+### 3. Why Referencing?
+
+Because one user can have **thousands of orders**.
+
+If you embed all orders inside the user document, it keeps growing and becomes difficult to manage.
+
+---
+
+### 4. Fetch User Orders
+
+Using `$lookup`:
+
+```javascript
+db.users.aggregate([
+  {
+    $lookup: {
+      from: "orders",
+      localField: "_id",
+      foreignField: "userId",
+      as: "orders",
+    },
+  },
+]);
+```
+
+---
+
+### 5. Interview Point ⭐
+
+- **User → Orders = One-to-Many**
+- Use **Referencing** because orders grow over time.
+- This is the standard design used in e-commerce applications.
+
+> **One-line interview answer:**
+> **"I model users and orders using separate collections with a `userId` reference in the `orders` collection. This keeps the user document small and allows the system to scale as the number of orders grows."**
+
+## What are MongoDB's limitations?
+
+### 1. Limited Joins
+
+MongoDB supports joins using `$lookup`, but they are **not as powerful or efficient** as SQL joins.
+
+---
+
+### 2. Flexible Schema
+
+A flexible schema is an advantage, but if not managed carefully, documents in the same collection can have different structures.
+
+---
+
+### 3. Transactions
+
+MongoDB supports transactions, but **multi-document transactions are slower** than single-document operations.
+
+---
+
+### 4. High Memory Usage
+
+Indexes improve performance but consume additional RAM and storage.
+
+---
+
+### 5. Data Duplication
+
+Because MongoDB often uses embedding, the same data may be stored in multiple documents.
+
+---
+
+### Interview Point ⭐
+
+MongoDB is **not the best choice** when:
+
+- Complex joins are the core requirement.
+- The application has a highly relational data model.
+- Very strict relational constraints are needed.
+
+> **One-line interview answer:**
+> **"MongoDB's main limitations are weaker support for complex joins compared to SQL, potential schema inconsistency, higher index memory usage, and slower multi-document transactions. It's best suited for applications with flexible schemas and high scalability requirements."**
