@@ -1429,3 +1429,63 @@ MongoDB is **not the best choice** when:
 
 > **One-line interview answer:**
 > **"MongoDB's main limitations are weaker support for complex joins compared to SQL, potential schema inconsistency, higher index memory usage, and slower multi-document transactions. It's best suited for applications with flexible schemas and high scalability requirements."**
+
+## 1. What is a Cluster?
+
+### What is it?
+
+A **Cluster** is a group of MongoDB servers that work together to store and manage your database.
+
+In **MongoDB Atlas**, your database runs inside a cluster.
+
+---
+
+### Interview Point ⭐
+
+A cluster can include:
+
+- Replica Sets (for high availability)
+- Shards (for horizontal scaling)
+
+> **One-line interview answer:**
+> **"A MongoDB cluster is a group of servers that work together to provide storage, high availability, and scalability."**
+
+---
+
+## 2. Shared vs Dedicated Cluster
+
+### Shared Cluster
+
+- Shares server resources with other users.
+- Low cost (or free).
+- Suitable for learning, development, and testing.
+
+Example:
+
+- Atlas **M0**, **M2**, **M5** clusters.
+
+---
+
+### Dedicated Cluster
+
+- Entire server resources are yours.
+- Better performance.
+- Suitable for production applications.
+
+Example:
+
+- Atlas **M10** and above.
+
+---
+
+### Interview Point ⭐
+
+| Shared Cluster        | Dedicated Cluster   |
+| --------------------- | ------------------- |
+| Shared resources      | Dedicated resources |
+| Lower performance     | Higher performance  |
+| Free/Low cost         | Paid                |
+| Development & Testing | Production          |
+
+> **One-line interview answer:**
+> **"A Shared Cluster shares resources with other users and is ideal for development, while a Dedicated Cluster provides exclusive resources, better performance, and is intended for production workloads."**
