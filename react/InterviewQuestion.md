@@ -581,19 +581,49 @@ users.map((user) => <li key={user.id}>{user.name}</li>);
 
 ## 29. What is conditional rendering in React?
 
-**Answer:**
-Conditional rendering displays UI based on conditions.
+What is conditional rendering in React?### Conditional Rendering
 
-**Real-Life Example:**
-Showing the admin panel only to admins.
+**Conditional rendering** means **showing different UI based on a condition**.
 
-**Working Example:**
+### Example
 
-```jsx id="j5m1q3"
-{
-  isLoggedIn ? <Dashboard /> : <Login />;
+```jsx id="yp8g4k"
+function App() {
+  const isLoggedIn = true;
+
+  return <>{isLoggedIn ? <h1>Welcome</h1> : <h1>Please Login</h1>}</>;
 }
 ```
+
+If `isLoggedIn` is `true`:
+
+```text
+Welcome
+```
+
+If `false`:
+
+```text
+Please Login
+```
+
+---
+
+### Another Example (`&&` operator)
+
+```jsx id="d0u3tn"
+{
+  isAdmin && <button>Delete</button>;
+}
+```
+
+The button is shown **only if** `isAdmin` is `true`.
+
+---
+
+### Interview Answer
+
+> **Conditional rendering** is the process of displaying different UI based on a condition. In React, it is commonly done using `if`, the ternary operator (`? :`), or the logical AND (`&&`) operator.
 
 ---
 
@@ -718,6 +748,8 @@ const squared = useMemo(() => {
 If `num` doesn't change, React reuses the previous value instead of recalculating it.
 
 ---
+
+What is conditional rendering in React?
 
 # 3. useCallback
 
