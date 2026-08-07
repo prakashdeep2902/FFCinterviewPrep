@@ -804,31 +804,120 @@ class ErrorBoundary extends React.Component {
 
 **Answer:**
 
-### Mounting
+Here's a **simple interview-friendly explanation**.
 
-```jsx id="d3x7m8"
+# React Component Lifecycle
+
+A React component has **3 phases**:
+
+1. **Mounting** → Component is created and shown on the screen.
+2. **Updating** → Component re-renders when state or props change.
+3. **Unmounting** → Component is removed from the screen.
+
+---
+
+## 1. Mounting (Component Appears)
+
+When the component loads for the first time.
+
+### Example
+
+```jsx
+import { useEffect } from "react";
+
+function App() {
+  useEffect(() => {
+    console.log("Component Mounted");
+  }, []);
+
+  return <h1>Hello</h1>;
+}
+```
+
+**Output**
+
+```
+Component Mounted
+```
+
+The empty dependency array `[]` means the effect runs **only once**, when the component is first displayed.
+
+---
+
+## 2. Updating (State or Props Change)
+
+When state or props change, React re-renders the component.
+
+### Example
+
+```jsx
+import { useState, useEffect } from "react";
+
+function App() {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    console.log("Count changed");
+  }, [count]);
+
+  return (
+    <>
+      <h1>{count}</h1>
+      <button onClick={() => setCount(count + 1)}>Increment</button>
+    </>
+  );
+}
+```
+
+Every time you click the button, `count` changes, so the effect runs.
+
+**Output**
+
+```
+Count changed
+Count changed
+Count changed
+```
+
+---
+
+## 3. Unmounting (Component Removed)
+
+When the component is removed from the screen, React runs the cleanup function.
+
+### Example
+
+```jsx
 useEffect(() => {
   console.log("Mounted");
-}, []);
-```
 
-### Updating
-
-```jsx id="j8v2c6"
-useEffect(() => {
-  console.log("Updated");
-}, [count]);
-```
-
-### Unmounting
-
-```jsx id="s5m9k3"
-useEffect(() => {
   return () => {
-    console.log("Unmounted");
+    console.log("Component Unmounted");
   };
 }, []);
 ```
+
+If the component is removed (for example, by navigating to another page), the output is:
+
+```
+Component Unmounted
+```
+
+---
+
+# Easy Way to Remember
+
+| Lifecycle  | Meaning              | Hook                                 |
+| ---------- | -------------------- | ------------------------------------ |
+| Mounting   | Component appears    | `useEffect(() => {}, [])`            |
+| Updating   | State/props change   | `useEffect(() => {}, [dependency])`  |
+| Unmounting | Component disappears | `return () => {}` inside `useEffect` |
+
+---
+
+## Interview Answer (30 seconds)
+
+> "A React component has three lifecycle phases: **Mounting**, **Updating**, and **Unmounting**. Mounting happens when the component first appears on the screen, updating happens whenever state or props change, and unmounting happens when the component is removed. In functional components, we use the `useEffect` Hook to handle all three phases. An empty dependency array (`[]`) is used for mounting, a dependency array like `[count]` is used for updates, and the cleanup function returned from `useEffect` is used for unmounting."
 
 **Real-Life Example:**
 
