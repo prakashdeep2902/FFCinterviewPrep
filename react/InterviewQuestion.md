@@ -388,38 +388,308 @@ const UserContext = createContext();
 
 ---
 
-## 22. How does Context API differ from Redux?
+## 22 What is Context API?
 
-| Context API          | Redux                    |
-| -------------------- | ------------------------ |
-| Simple state sharing | Complex state management |
-| Built into React     | External library         |
-| Small-Medium Apps    | Large Apps               |
+**Context API** is used to **share data between components without passing props manually (prop drilling).**
 
-**Real-Life Example:**
-Local office notice board vs company-wide management system.
+For example, sharing:
+
+- User data
+- Theme (Dark/Light)
+- Language
+- Authentication
 
 ---
 
-## 23. What are custom hooks?
-
-**Answer:**
-Custom hooks allow reusable stateful logic.
-
-**Real-Life Example:**
-Creating your own utility tool.
-
-**Working Example:**
+## Step 1: Create Context
 
 ```jsx
-function useCounter() {
-  const [count, setCount] = useState(0);
+// context/UserContext.js
 
-  return { count, setCount };
+import { createContext } from "react";
+
+export const UserContext = createContext();
+```
+
+---
+
+## Step 2: Create Provider
+
+```jsx
+// context/UserProvider.js
+
+import { useState } from "react";
+import { UserContext } from "./UserContext";
+
+function UserProvider({ children }) {
+  const [user, setUser] = useState("Prakash");
+
+  return (
+    <UserContext.Provider value={{ user, setUser }}>
+      {children}
+    </UserContext.Provider>
+  );
+}
+
+export default UserProvider;
+```
+
+---
+
+## Step 3: Wrap Your App
+
+```jsx
+// main.jsx or index.js
+
+import UserProvider from "./context/UserProvider";
+
+root.render(
+  <UserProvider>
+    <App />
+  </UserProvider>,
+);
+```
+
+---
+
+## Step 4: Use Context
+
+```jsx
+import { useContext } from "react";
+import { UserContext } from "./context/UserContext";
+
+function Home() {
+  const { user } = useContext(UserContext);
+
+  return <h1>{user}</h1>;
+}
+```
+
+**Output**
+
+```text
+Prakash
+```
+
+---
+
+## Folder Structure
+
+```text
+src/
+ ├── context/
+ │    ├── UserContext.js
+ │    └── UserProvider.js
+ ├── App.js
+ └── main.jsx
+```
+
+---
+
+## Interview Answer
+
+> **Context API** is a React feature used to share data across multiple components without prop drilling. We create a context using `createContext()`, wrap the application with a `Provider`, pass data through the `value` prop, and access it anywhere using the `useContext()` hook. It is commonly used for authentication, themes, and global state.
+
+---
+
+Here's a **simple Light/Dark Theme example using Context API**.
+
+## Folder Structure
+
+```text
+src/
+│── context/
+│     └── ThemeContext.jsx
+│
+│── components/
+│     └── Home.jsx
+│
+│── App.jsx
+│── main.jsx
+```
+
+---
+
+# 1. `context/ThemeContext.jsx`
+
+```jsx
+import { createContext, useState } from "react";
+
+export const ThemeContext = createContext();
+
+export default function ThemeProvider({ children }) {
+  const [theme, setTheme] = useState("light");
+
+  const toggleTheme = () => {
+    setTheme(theme === "light" ? "dark" : "light");
+  };
+
+  return (
+    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
 }
 ```
 
 ---
+
+# 2. `components/Home.jsx`
+
+```jsx
+import { useContext } from "react";
+import { ThemeContext } from "../context/ThemeContext";
+
+function Home() {
+  const { theme, toggleTheme } = useContext(ThemeContext);
+
+  return (
+    <div
+      style={{
+        background: theme === "light" ? "#fff" : "#222",
+        color: theme === "light" ? "#000" : "#fff",
+        height: "100vh",
+        padding: "20px",
+      }}
+    >
+      <h1>{theme} Theme</h1>
+
+      <button onClick={toggleTheme}>Change Theme</button>
+    </div>
+  );
+}
+
+export default Home;
+```
+
+---
+
+# 3. `App.jsx`
+
+```jsx
+import Home from "./components/Home";
+
+function App() {
+  return <Home />;
+}
+
+export default App;
+```
+
+---
+
+# 4. `main.jsx`
+
+```jsx
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import ThemeProvider from "./context/ThemeContext";
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <ThemeProvider>
+    <App />
+  </ThemeProvider>,
+);
+```
+
+---
+
+# Flow
+
+```text
+main.jsx
+    │
+    ▼
+ThemeProvider
+    │
+    ▼
+App
+    │
+    ▼
+Home
+    │
+    ▼
+useContext(ThemeContext)
+    │
+    ▼
+theme + toggleTheme
+```
+
+---
+
+## Interview Answer
+
+> **Context API** lets us share data globally without prop drilling. In this example, we created a `ThemeContext`, wrapped the app with `ThemeProvider`, stored the current theme in state, and exposed `theme` and `toggleTheme` through the provider. Any component can access them using the `useContext()` hook to switch between light and dark themes.
+
+## 23. What are custom hooks?
+
+### Custom Hook
+
+A **custom hook** is a **JavaScript function that uses React Hooks** to reuse logic across multiple components.
+
+A custom hook **must start with `use`**.
+
+---
+
+### Example
+
+#### Custom Hook
+
+```jsx
+import { useState } from "react";
+
+function useCounter() {
+  const [count, setCount] = useState(0);
+
+  const increment = () => setCount(count + 1);
+
+  return { count, increment };
+}
+```
+
+#### Use it in a Component
+
+```jsx
+function App() {
+  const { count, increment } = useCounter();
+
+  return (
+    <>
+      <h1>{count}</h1>
+      <button onClick={increment}>+</button>
+    </>
+  );
+}
+```
+
+---
+
+### Where to Create It?
+
+Usually inside a **`hooks`** folder.
+
+```text
+src/
+ ├── hooks/
+ │    └── useCounter.js
+ ├── components/
+ └── App.js
+```
+
+---
+
+### Why use Custom Hooks?
+
+- Reuse logic
+- Keep components clean
+- Avoid duplicate code
+
+---
+
+### Interview Answer
+
+> **A custom hook** is a reusable JavaScript function that uses React Hooks. It must start with `use` (e.g., `useCounter`). We create it inside a `hooks` folder and use it in multiple components to share common logic like fetching data, authentication, or form handling.
 
 ## 24. What is prop drilling?
 
@@ -436,19 +706,55 @@ Use Context API or Redux.
 
 ## 25. What are Higher-Order Components (HOCs)?
 
-**Answer:**
-A HOC is a function that takes a component and returns an enhanced component.
+### Higher-Order Component (HOC)
 
-**Real-Life Example:**
-Adding extra features to a car.
+A **Higher-Order Component (HOC)** is a **function that takes a component and returns a new component** with extra functionality.
 
-**Working Example:**
+### Example
 
-```jsx
-const Enhanced = withAuth(Component);
+```jsx id="4n72u5"
+function withAuth(Component) {
+  return function () {
+    const isLoggedIn = true;
+
+    return isLoggedIn ? <Component /> : <h1>Please Login</h1>;
+  };
+}
+```
+
+Use it:
+
+```jsx id="u6zvbp"
+function Dashboard() {
+  return <h1>Dashboard</h1>;
+}
+
+const ProtectedDashboard = withAuth(Dashboard);
+```
+
+If the user is logged in:
+
+```text id="22uldt"
+Dashboard
+```
+
+Otherwise:
+
+```text id="ttvjlwm"
+Please Login
 ```
 
 ---
+
+### Why use it?
+
+To **reuse common logic** (authentication, logging, permissions, etc.) across multiple components.
+
+---
+
+### Interview Answer
+
+> **A Higher-Order Component (HOC)** is a function that takes a component as input and returns a new component with additional functionality. It is used to reuse component logic, such as authentication, logging, or permissions.
 
 # Quick Revision Formula
 
