@@ -676,19 +676,121 @@ const total = useMemo(() => {
 
 ## 33. What is React.memo and when should you use it?
 
-**Answer:**
-React.memo prevents unnecessary re-renders if props haven't changed.
+These three are used for **performance optimization**, but they optimize **different things**.
 
-**Real-Life Example:**
-Reusing an existing report instead of generating it again.
+| Hook          | Optimizes | Used For                                  |
+| ------------- | --------- | ----------------------------------------- |
+| `React.memo`  | Component | Prevents unnecessary component re-renders |
+| `useMemo`     | Value     | Caches an expensive calculation           |
+| `useCallback` | Function  | Caches a function                         |
 
-**Working Example:**
+---
 
-```jsx id="q9v5n8"
-const User = React.memo(function User({ name }) {
+# 1. React.memo
+
+Prevents a component from re-rendering if its **props haven't changed**.
+
+### Example
+
+```jsx
+const Child = React.memo(({ name }) => {
+  console.log("Child Rendered");
   return <h1>{name}</h1>;
 });
 ```
+
+If the parent re-renders but `name` is the same, `Child` **doesn't re-render**.
+
+---
+
+# 2. useMemo
+
+Caches the **result of a calculation**.
+
+### Example
+
+```jsx
+const squared = useMemo(() => {
+  return num * num;
+}, [num]);
+```
+
+If `num` doesn't change, React reuses the previous value instead of recalculating it.
+
+---
+
+# 3. useCallback
+
+Caches a **function** so it's not recreated on every render.
+
+### Example
+
+```jsx
+const handleClick = useCallback(() => {
+  console.log("Clicked");
+}, []);
+```
+
+If dependencies don't change, the same function is reused.
+
+---
+
+# Main Difference
+
+```text
+React.memo  → Memoizes a COMPONENT
+useMemo     → Memoizes a VALUE
+useCallback → Memoizes a FUNCTION
+```
+
+---
+
+# Easy Example
+
+```jsx
+const Child = React.memo(({ onClick }) => {
+  console.log("Child Render");
+  return <button onClick={onClick}>Click</button>;
+});
+
+function App() {
+  const [count, setCount] = useState(0);
+
+  const handleClick = useCallback(() => {
+    console.log("Hello");
+  }, []);
+
+  return (
+    <>
+      <button onClick={() => setCount(count + 1)}>Count {count}</button>
+
+      <Child onClick={handleClick} />
+    </>
+  );
+}
+```
+
+Here:
+
+- `React.memo` → Prevents `Child` from re-rendering.
+- `useCallback` → Prevents `handleClick` from being recreated.
+
+If you also had an expensive calculation:
+
+```jsx
+const total = useMemo(() => calculateTotal(items), [items]);
+```
+
+`useMemo` prevents `calculateTotal()` from running unless `items` change.
+
+---
+
+## Interview Answer
+
+> - **`React.memo`** prevents a component from re-rendering if its props haven't changed.
+> - **`useMemo`** caches the result of an expensive calculation.
+> - **`useCallback`** caches a function so it isn't recreated on every render.
+>   They are all performance optimization techniques, but they optimize different things: **component, value, and function**, respectively.
 
 ---
 
