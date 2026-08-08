@@ -433,20 +433,18 @@ Error
 
 ### Difference Between `race()` and `any()`
 
-Using the same promises:
+| `Promise.race()`                                               | `Promise.any()`                               |
+| -------------------------------------------------------------- | --------------------------------------------- |
+| Returns the **first settled** promise (fulfilled or rejected). | Returns the **first fulfilled** promise.      |
+| Can return **success or error**.                               | Ignores rejected promises until one succeeds. |
+| Rejects immediately if the first settled promise rejects.      | Rejects only if **all promises reject**.      |
+
+### Example: `Promise.race()`
 
 ```javascript
-const p1 = new Promise((resolve, reject) =>
-  setTimeout(() => reject("Error"), 1000),
-);
-
-const p2 = new Promise((resolve) => setTimeout(() => resolve("Success"), 2000));
-```
-
-#### `Promise.race()`
-
-```javascript
-Promise.race([p1, p2]).then(console.log).catch(console.error);
+Promise.race([Promise.reject("Error"), Promise.resolve("Success")])
+  .then(console.log)
+  .catch(console.log);
 ```
 
 **Output:**
@@ -455,14 +453,16 @@ Promise.race([p1, p2]).then(console.log).catch(console.error);
 Error
 ```
 
-Because `p1` **settled first** (it rejected).
+> The rejected promise settled first.
 
 ---
 
-#### `Promise.any()`
+### Example: `Promise.any()`
 
 ```javascript
-Promise.any([p1, p2]).then(console.log).catch(console.error);
+Promise.any([Promise.reject("Error"), Promise.resolve("Success")])
+  .then(console.log)
+  .catch(console.log);
 ```
 
 **Output:**
@@ -471,33 +471,12 @@ Promise.any([p1, p2]).then(console.log).catch(console.error);
 Success
 ```
 
-Because `Promise.any()` **ignores rejected promises** and waits for the first fulfilled one.
+> It ignores the rejected promise and returns the first successful one.
 
-### Easy to Remember
+### Easy to remember
 
-- **`Promise.race()`** → **First settled** (resolve **or** reject) wins.
-- **`Promise.any()`** → **First fulfilled** (resolved) wins.
-
-## 16. What is the this keyword and how does it behave?
-
-**Answer:**
-`this` refers to the object that calls the function.
-
-**Real-Life Example:**
-"Me" changes depending on who is speaking.
-
-**Working Example:**
-
-```js
-const user = {
-  name: "John",
-  show() {
-    console.log(this.name);
-  },
-};
-
-user.show();
-```
+- 🏁 **`race()`** → **First to finish wins** (success or failure).
+- ✅ **`any()`** → **First success wins** (ignores failures).
 
 ---
 
@@ -528,23 +507,94 @@ const obj = {
 
 ---
 
-## 18. What are higher-order functions?
+### What are Higher-Order Functions (HOF)?
 
-**Answer:**
-Functions that take other functions as arguments or return functions.
+A **Higher-Order Function** is a function that:
 
-**Real-Life Example:**
-A manager assigning work to employees.
+1. **Takes another function as an argument**, or
+2. **Returns another function**.
 
-**Working Example:**
+---
 
-```js
-function greet(fn) {
-  fn();
+### Example 1: Takes a function as an argument
+
+```javascript
+function greet(name) {
+  return `Hello ${name}`;
 }
 
-greet(() => console.log("Hello"));
+function processUser(callback) {
+  console.log(callback("John"));
+}
+
+processUser(greet);
 ```
+
+**Output:**
+
+```text
+Hello John
+```
+
+Here, `processUser()` is a **Higher-Order Function** because it receives `greet` as an argument.
+
+---
+
+### Example 2: Returns a function
+
+```javascript
+function multiply(x) {
+  return function (y) {
+    return x * y;
+  };
+}
+
+const double = multiply(2);
+
+console.log(double(5));
+```
+
+**Output:**
+
+```text
+10
+```
+
+Here, `multiply()` is a **Higher-Order Function** because it returns another function.
+
+---
+
+### Common Higher-Order Functions in JavaScript
+
+- `map()`
+- `filter()`
+- `reduce()`
+- `forEach()`
+- `find()`
+- `some()`
+- `every()`
+
+Example:
+
+```javascript
+const nums = [1, 2, 3];
+
+const result = nums.map((num) => num * 2);
+
+console.log(result);
+```
+
+**Output:**
+
+```text
+[2, 4, 6]
+```
+
+`map()` is a Higher-Order Function because it accepts a callback function.
+
+### Interview one-liner
+
+> **A Higher-Order Function is a function that takes another function as an argument or returns another function.**
 
 ---
 
@@ -1259,19 +1309,131 @@ window.addEventListener("scroll", throttledScroll);
 
 ## 30. What are memory leaks and how can they be prevented?
 
-**Answer:**
-Memory leaks occur when unused objects remain referenced and cannot be garbage collected.
+### What is a Memory Leak?
 
-**Real-Life Example:**
-Keeping unnecessary files forever.
+A **memory leak** happens when memory is **no longer needed but is still being used** because something is still referencing it.
 
-**Working Example:**
+As a result:
 
-```js
-let data = {};
+- ❌ Memory usage keeps increasing.
+- ❌ Application becomes slow.
+- ❌ Can even crash if memory runs out.
 
-data = null;
+---
+
+### Common Causes & Prevention
+
+#### 1. Unremoved Event Listeners
+
+❌ Bad
+
+```javascript
+const btn = document.getElementById("btn");
+
+function handleClick() {
+  console.log("Clicked");
+}
+
+btn.addEventListener("click", handleClick);
 ```
+
+If the button is removed but the listener is not, memory cannot be freed.
+
+✅ Good
+
+```javascript
+btn.removeEventListener("click", handleClick);
+```
+
+---
+
+#### 2. Uncleared Timers
+
+❌ Bad
+
+```javascript
+const id = setInterval(() => {
+  console.log("Running...");
+}, 1000);
+```
+
+The timer keeps running forever.
+
+✅ Good
+
+```javascript
+clearInterval(id);
+```
+
+---
+
+#### 3. Global Variables
+
+❌ Bad
+
+```javascript
+data = new Array(1000000);
+```
+
+Global variables stay in memory until the page closes.
+
+✅ Good
+
+```javascript
+function loadData() {
+  const data = new Array(1000000);
+}
+```
+
+---
+
+#### 4. Closures Holding References
+
+❌ Bad
+
+```javascript
+function outer() {
+  const bigData = new Array(1000000);
+
+  return function () {
+    console.log(bigData.length);
+  };
+}
+
+const fn = outer();
+```
+
+`bigData` stays in memory because the returned function still references it.
+
+---
+
+### Interview Example (React)
+
+```javascript
+useEffect(() => {
+  const id = setInterval(() => {
+    console.log("Running");
+  }, 1000);
+
+  return () => clearInterval(id);
+}, []);
+```
+
+Without `clearInterval()`, the interval continues even after the component is removed, causing a memory leak.
+
+---
+
+### How to Prevent Memory Leaks
+
+- ✅ Remove event listeners.
+- ✅ Clear `setTimeout` and `setInterval`.
+- ✅ Avoid unnecessary global variables.
+- ✅ Release large object references when no longer needed.
+- ✅ Clean up subscriptions, WebSockets, and observers.
+
+### Interview one-liner
+
+> **A memory leak occurs when unused objects remain in memory because references to them still exist. Prevent it by cleaning up event listeners, timers, subscriptions, and unnecessary references.**
 
 ---
 

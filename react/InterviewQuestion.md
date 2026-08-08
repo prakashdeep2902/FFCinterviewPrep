@@ -170,26 +170,69 @@ State = Employee's current task.
 
 ---
 
-## 10. What are controlled and uncontrolled components?
+## Controlled Component
 
-**Answer:**
-Controlled components use React state. Uncontrolled components use DOM refs.
+A **controlled component** is a form input whose value is controlled by **React state**.
 
-**Real-Life Example:**
-Controlled = Teacher monitors attendance.
-Uncontrolled = Students mark attendance themselves.
-
-**Working Example:**
+### Example
 
 ```jsx
-const [name, setName] = useState("");
+import { useState } from "react";
+
+function App() {
+  const [name, setName] = useState("");
+
+  return <input value={name} onChange={(e) => setName(e.target.value)} />;
+}
 ```
 
-Uncontrolled:
+Here, React controls the input value.
+
+---
+
+## Uncontrolled Component
+
+An **uncontrolled component** stores its value in the **DOM**, and we access it using `useRef`.
+
+### Example
 
 ```jsx
-const inputRef = useRef();
+import { useRef } from "react";
+
+function App() {
+  const inputRef = useRef();
+
+  const handleClick = () => {
+    alert(inputRef.current.value);
+  };
+
+  return (
+    <>
+      <input ref={inputRef} />
+      <button onClick={handleClick}>Submit</button>
+    </>
+  );
+}
 ```
+
+Here, the DOM controls the input value.
+
+---
+
+## Difference
+
+| Controlled                 | Uncontrolled                      |
+| -------------------------- | --------------------------------- |
+| Controlled by React state  | Controlled by the DOM             |
+| Uses `useState`            | Uses `useRef`                     |
+| Re-renders on every change | Doesn't re-render on every change |
+| Easier validation          | Good for simple forms             |
+
+---
+
+## Interview Answer
+
+> **Controlled components** store form data in React state using `useState`, giving React full control over the input. **Uncontrolled components** store data in the DOM and access it using `useRef`. Controlled components are preferred for forms that need validation and dynamic updates, while uncontrolled components are useful for simple forms or direct DOM access.
 
 ---
 
@@ -287,25 +330,70 @@ useEffect(() => {
 
 ## 16. What is the difference between useEffect and useLayoutEffect?
 
-**Answer:**
+## `useEffect`
 
-- useEffect runs after painting.
-- useLayoutEffect runs before painting.
+Runs **after the browser paints (renders)** the UI.
 
-**Real-Life Example:**
+**Use cases:**
 
-- useEffect = Fix after customer sees it.
-- useLayoutEffect = Fix before customer sees it.
+- API calls
+- Fetch data
+- Timers (`setTimeout`, `setInterval`)
+- Event listeners
 
-**Working Example:**
+### Example
 
-```jsx
-useLayoutEffect(() => {
-  console.log("Before Paint");
-});
+```jsx id="frkg2l"
+useEffect(() => {
+  fetchUsers();
+}, []);
 ```
 
 ---
+
+## `useLayoutEffect`
+
+Runs **before the browser paints** the UI.
+
+It blocks painting until it finishes.
+
+**Use cases:**
+
+- Measure element size
+- Change DOM before the user sees it
+- Prevent UI flickering
+
+### Example
+
+```jsx id="ucxv2t"
+import { useLayoutEffect, useRef } from "react";
+
+function App() {
+  const divRef = useRef();
+
+  useLayoutEffect(() => {
+    console.log(divRef.current.offsetHeight);
+  }, []);
+
+  return <div ref={divRef}>Hello</div>;
+}
+```
+
+---
+
+## Difference
+
+| `useEffect`                           | `useLayoutEffect`                            |
+| ------------------------------------- | -------------------------------------------- |
+| Runs **after** paint                  | Runs **before** paint                        |
+| Doesn't block UI                      | Blocks UI until finished                     |
+| Used for API calls, timers, listeners | Used for DOM measurements and layout changes |
+
+---
+
+## Interview Answer
+
+> **`useEffect`** runs after React updates the UI and is mainly used for side effects like API calls, timers, and event listeners. **`useLayoutEffect`** runs synchronously after the DOM is updated but before the browser paints the screen. It is used when you need to measure or modify the DOM before the user sees it, such as calculating element sizes or preventing flickering.
 
 ## 17. What is the purpose of useRef?
 
@@ -368,22 +456,6 @@ Reusing the same key instead of making a new one every time.
 const handleClick = useCallback(() => {
   console.log("Clicked");
 }, []);
-```
-
----
-
-## 21. What is React Context API?
-
-**Answer:**
-Context API shares data across components without passing props manually.
-
-**Real-Life Example:**
-A company notice board accessible by everyone.
-
-**Working Example:**
-
-```jsx
-const UserContext = createContext();
 ```
 
 ---
