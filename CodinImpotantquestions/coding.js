@@ -4,12 +4,11 @@ function removeDuplicates(arr) {
 
   for (let i = 0; i < arr.length; i++) {
     if (seen[arr[i]] !== true) {
-      seen[arr[i]] = true;
+      seen[arr[i]] = 0 || i + 1;
       result[result.length] = arr[i];
     }
   }
 
-  console.log(seen);
   return result;
 }
 
