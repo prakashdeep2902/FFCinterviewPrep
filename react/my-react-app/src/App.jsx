@@ -4,6 +4,7 @@ import { UserContext } from "./UserContext";
 import Example2 from "./component/Example2";
 import Rendering from "./component/Rendering";
 import Counter from "./component/Counter";
+import Debouncing from "./component/Debouncing";
 
 const App = () => {
   const user = {
@@ -19,14 +20,16 @@ const App = () => {
     <>
       <UserContext.Provider value={user}>
         <div>
-          <h1>APP</h1>
+          {/* <h1>APP</h1>
           <Example value={"24"} />
           <Example2 />
 
           <button onClick={() => setCount((prev) => prev + 1)}>{Count}</button>
 
           <Rendering />
-          <Counter />
+          <Counter /> */}
+
+          <Debouncing />
         </div>
       </UserContext.Provider>
     </>
