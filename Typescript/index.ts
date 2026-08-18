@@ -18,14 +18,13 @@ const user = (value: userType): userType => {
 };
 
 const result = user({
-  name: "prakaash",
+  name: "prakash",
   age: "24",
   fetures: ["faire in colour", 6.5, false],
   job: "SDE",
 });
 
 // console.log(result);
-
 function getValue<T>(value: T): T {
   return value;
 }
